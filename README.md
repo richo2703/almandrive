@@ -2,7 +2,7 @@
 
 Production-oriented MVP monorepo for a Telegram Mini App that teaches German driving theory using original or user-owned question material.
 
-The MVP supports English question content only. Its relational translation model and importer are ready for German, Russian, Turkish, Arabic, Romanian, Polish, Croatian, Portuguese, Spanish, Italian, French, and Greek.
+The MVP currently supports question content in English, German, Russian, Turkish, and Uzbek. Its relational translation model and importer remain ready for German, Russian, Turkish, Arabic, Romanian, Polish, Croatian, Portuguese, Spanish, Italian, French, and Greek, with Uzbek added as a learning language.
 
 > Legal note: the included questions are original demo material. Do not import or distribute copyrighted official TÜV/DEKRA questions unless you have the necessary rights.
 
@@ -122,7 +122,13 @@ questionTextDe, explanationDe, answerADe
 questionTextRu, explanationRu, answerARu
 ```
 
-The corresponding language must exist in the `Language` table. English remains the only active content language until translated question sets are added and reviewed.
+The corresponding language must exist in the `Language` table. The current content languages are English, German, Russian, Turkish, and Uzbek.
+
+Uzbek is also supported as a learning language and translation target:
+
+- interface language support: yes
+- question translation target: yes
+- official German exam language: no
 
 ## Import a ZIP question base
 
@@ -189,6 +195,72 @@ npm run questions:clear-demo
 
 This deletes questions whose `externalId` begins with `demo-`. It preserves users, languages, categories, topics, and all imported questions.
 
+## Translation workflow
+
+The app does not use paid translation APIs and does not auto-translate anything. Translation work is done offline with CSV files.
+
+Supported translation targets for the workflow are:
+
+- `ru`
+- `tr`
+- `uz`
+
+Export rows that still need translation:
+
+```bash
+npm run translations:export-missing
+```
+
+This writes:
+
+- `import/translations/missing-ru.csv`
+- `import/translations/missing-tr.csv`
+- `import/translations/missing-uz.csv`
+
+Each CSV contains the source question data plus empty target columns. Fill the target columns manually or with an external translation workflow. Do not change `questionExternalId`.
+
+When the files are complete, copy or rename them to:
+
+- `import/translations/completed-ru.csv`
+- `import/translations/completed-tr.csv`
+- `import/translations/completed-uz.csv`
+
+Then import the translations:
+
+```bash
+npm run translations:import
+```
+
+Check translation coverage at any time:
+
+```bash
+npm run translations:status
+```
+
+The import workflow upserts `QuestionTranslation` and `AnswerOptionTranslation` rows by `externalId` and language code. Existing English and German content is preserved.
+
+If you want to translate Russian in smaller chunks, split the missing file into 100-row batches:
+
+```bash
+npm run translations:split-ru
+```
+
+This writes batch files into:
+
+```text
+import/translations/batches/ru/
+```
+
+with names like `ru-batch-001.csv`. Translate each batch externally or with your own workflow, then rename the result to `ru-batch-001-translated.csv` and merge them back:
+
+```bash
+npm run translations:merge-ru
+```
+
+The merge script reconstructs `import/translations/completed-ru.csv` and validates the row count before writing it.
+
+Batch files are numbered in order, so the CSV header and row order stay stable across split and merge.
+
 Run the application after import:
 
 ```bash
@@ -210,6 +282,9 @@ npm run seed
 npm run import:questions
 npm run import:my-base
 npm run questions:clear-demo
+npm run translations:export-missing
+npm run translations:import
+npm run translations:status
 npm run prisma:generate
 npm run prisma:migrate
 npm run prisma:studio

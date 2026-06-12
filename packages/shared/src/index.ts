@@ -5,6 +5,7 @@ export const languageCodes = [
   "en",
   "ru",
   "tr",
+  "uz",
   "ar",
   "ro",
   "pl",

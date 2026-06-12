@@ -15,6 +15,7 @@ const languages = [
   ["en", "English", "English", false],
   ["ru", "Russian", "Русский", false],
   ["tr", "Turkish", "Türkçe", false],
+  ["uz", "Uzbek", "O‘zbekcha", false],
   ["ar", "Arabic", "العربية", true],
   ["ro", "Romanian", "Română", false],
   ["pl", "Polish", "Polski", false],
@@ -158,6 +159,7 @@ const demoQuestions: DemoQuestion[] = [
 ];
 
 async function main() {
+  const contentLanguages = new Set(["en", "de", "ru", "tr", "uz"]);
   for (const [code, name, nativeName, isRtl] of languages) {
     await prisma.language.upsert({
       where: { code },
@@ -166,7 +168,7 @@ async function main() {
         nativeName,
         isRtl,
         isInterfaceActive: true,
-        isContentActive: code === "en",
+        isContentActive: contentLanguages.has(code),
       },
       create: {
         code,
@@ -174,7 +176,7 @@ async function main() {
         nativeName,
         isRtl,
         isInterfaceActive: true,
-        isContentActive: code === "en",
+        isContentActive: contentLanguages.has(code),
       },
     });
   }

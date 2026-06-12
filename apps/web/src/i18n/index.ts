@@ -11,16 +11,17 @@ import { pt } from "./locales/pt";
 import { ro } from "./locales/ro";
 import { ru } from "./locales/ru";
 import { tr } from "./locales/tr";
+import { uz } from "./locales/uz";
 
 export const supportedLanguages = [
-  "de", "en", "ru", "tr", "ar", "ro", "pl", "hr", "pt", "es", "it", "fr", "el",
+  "de", "en", "ru", "tr", "uz", "ar", "ro", "pl", "hr", "pt", "es", "it", "fr", "el",
 ] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 export type TranslationParams = Record<string, string | number>;
 export type Translate = (key: TranslationKey, params?: TranslationParams) => string;
 
 const dictionaries: Record<SupportedLanguage, TranslationDictionary> = {
-  de, en, ru, tr, ar, ro, pl, hr, pt, es, it, fr, el,
+  de, en, ru, tr, uz, ar, ro, pl, hr, pt, es, it, fr, el,
 };
 
 export function isSupportedLanguage(value: string): value is SupportedLanguage {

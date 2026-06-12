@@ -14,6 +14,11 @@
     "import:my-base": "tsx src/import-my-base.ts",
     "questions:clear-demo": "tsx src/clear-demo-questions.ts",
     "questions:auto-topics": "node --import tsx src/auto-topics.ts",
+    "translations:export-missing": "node --import tsx src/translations-export-missing.ts",
+    "translations:import": "node --import tsx src/translations-import.ts",
+    "translations:status": "node --import tsx src/translations-status.ts",
+    "translations:split-ru": "node --import tsx src/translations-split-ru.ts",
+    "translations:merge-ru": "node --import tsx src/translations-merge-ru.ts",
     "db:inspect": "node scripts/db-inspect.mjs",
     "db:repair-questions": "node scripts/db-repair-questions.mjs",
     "typecheck": "tsc --noEmit"
