@@ -1,0 +1,36 @@
+{
+  "name": "theorie-direkt",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web,bot -c blue,green,yellow \"npm run dev -w @theorie-direkt/api\" \"npm run dev -w @theorie-direkt/web\" \"npm run dev -w @theorie-direkt/bot\"",
+    "dev:api": "npm run dev -w @theorie-direkt/api",
+    "dev:web": "npm run dev -w @theorie-direkt/web",
+    "dev:bot": "npm run dev -w @theorie-direkt/bot",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "seed": "tsx packages/database/prisma/seed.ts",
+    "import:questions": "tsx packages/database/src/import-questions.ts",
+    "import:my-base": "tsx packages/database/src/import-my-base.ts",
+    "questions:clear-demo": "tsx packages/database/src/clear-demo-questions.ts",
+    "questions:auto-topics": "node --import tsx packages/database/src/auto-topics.ts",
+    "db:inspect": "node packages/database/scripts/db-inspect.mjs",
+    "db:repair-questions": "node packages/database/scripts/db-repair-questions.mjs",
+    "prisma:generate": "prisma generate --config packages/database/prisma.config.ts",
+    "prisma:migrate": "prisma migrate dev --config packages/database/prisma.config.ts",
+    "prisma:studio": "prisma studio --config packages/database/prisma.config.ts",
+    "postinstall": "npm run prisma:generate"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
