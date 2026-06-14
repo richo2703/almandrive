@@ -11,6 +11,11 @@ import { fileURLToPath } from "node:url";
 import { parse } from "csv-parse/sync";
 import { PrismaClient, QuestionType } from "@prisma/client";
 import { z } from "zod";
+import {
+  catalogLanguageCodes,
+  getLocalizedCategoryName,
+  localizedImportedTopicNames,
+} from "./catalog-localization.js";
 
 const prisma = new PrismaClient();
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -267,33 +272,54 @@ function findSourceFile(languageSuffix: "" | "_de") {
   return null;
 }
 
-async function getOrCreateCategory(code: string) {
+async function getOrCreateCategory(
+  code: string,
+  languageIds: Record<typeof catalogLanguageCodes[number], string>,
+) {
   const existing = await prisma.licenseCategory.findUnique({ where: { code } });
-  if (existing) return existing;
-  const last = await prisma.licenseCategory.aggregate({ _max: { sortOrder: true } });
-  return prisma.licenseCategory.create({
-    data: {
-      code,
-      name: categoryNames[code] ?? code,
-      description: categoryNames[code] ?? null,
-      sortOrder: (last._max.sortOrder ?? 0) + 1,
-    },
-  });
+  const category =
+    existing ??
+    await prisma.licenseCategory.create({
+      data: {
+        code,
+        name: categoryNames[code] ?? code,
+        description: categoryNames[code] ?? null,
+        sortOrder: ((await prisma.licenseCategory.aggregate({ _max: { sortOrder: true } }))._max.sortOrder ?? 0) + 1,
+      },
+    });
+  for (const languageCode of catalogLanguageCodes) {
+    const languageId = languageIds[languageCode];
+    const name = getLocalizedCategoryName(code, languageCode);
+    await prisma.licenseCategoryTranslation.upsert({
+      where: {
+        categoryId_languageId: {
+          categoryId: category.id,
+          languageId,
+        },
+      },
+      update: { name },
+      create: {
+        categoryId: category.id,
+        languageId,
+        name,
+      },
+    });
+  }
+  return category;
 }
 
 async function getOrCreateTopic(
   slug: string,
-  names: Partial<Record<"en" | "de", string>>,
-  languageIds: Record<"en" | "de", string>,
+  names: ReturnType<typeof localizedImportedTopicNames>,
+  languageIds: Record<typeof catalogLanguageCodes[number], string>,
 ) {
   const topic = await prisma.topic.upsert({
     where: { slug },
     update: { isActive: true },
     create: { slug, sortOrder: 100 },
   });
-  for (const code of ["en", "de"] as const) {
+  for (const code of catalogLanguageCodes) {
     const name = names[code];
-    if (!name) continue;
     await prisma.topicTranslation.upsert({
       where: {
         topicId_languageId: {
@@ -346,12 +372,12 @@ async function copyMediaDirectory(type: "images" | "videos") {
 async function importQuestion(
   english: NormalizedRow,
   german: NormalizedRow | undefined,
-  languageIds: Record<"en" | "de", string>,
+  languageIds: Record<typeof catalogLanguageCodes[number], string>,
 ) {
-  const category = await getOrCreateCategory(english.categoryCode);
+  const category = await getOrCreateCategory(english.categoryCode, languageIds);
   const topic = await getOrCreateTopic(
     english.topicSlug,
-    { en: english.topicName, de: german?.topicName },
+    localizedImportedTopicNames(english.topicName, german?.topicName),
     languageIds,
   );
   const type =
@@ -473,13 +499,13 @@ async function main() {
   const germanById = new Map(germanRows.map((row) => [row.externalId, row]));
 
   const languages = await prisma.language.findMany({
-    where: { code: { in: ["en", "de"] } },
+    where: { code: { in: [...catalogLanguageCodes] } },
   });
   const languageIds = Object.fromEntries(
     languages.map((language) => [language.code, language.id]),
-  ) as Partial<Record<"en" | "de", string>>;
-  if (!languageIds.en || !languageIds.de) {
-    throw new Error("English and German language seed records are required. Run npm run seed first.");
+  ) as Partial<Record<typeof catalogLanguageCodes[number], string>>;
+  if (!languageIds.en || !languageIds.de || !languageIds.ru || !languageIds.tr || !languageIds.uz) {
+    throw new Error("English, German, Russian, Turkish, and Uzbek language seed records are required. Run npm run seed first.");
   }
 
   const [copiedImages, copiedVideos] = await Promise.all([
@@ -493,7 +519,7 @@ async function main() {
       await importQuestion(
         row,
         germanById.get(row.externalId),
-        languageIds as Record<"en" | "de", string>,
+        languageIds as Record<typeof catalogLanguageCodes[number], string>,
       );
       imported += 1;
       if (imported % 250 === 0) console.log(`Imported ${imported}/${englishRows.length} questions...`);

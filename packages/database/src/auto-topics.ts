@@ -1,32 +1,40 @@
 import "./load-env.js";
 import { PrismaClient } from "@prisma/client";
 import { classifyTopic, topicDefinitions } from "./topic-classification.js";
+import {
+  catalogLanguageCodes,
+  getLocalizedGenericTopicName,
+} from "./catalog-localization.js";
 
 const prisma = new PrismaClient();
 
 async function ensureTopics() {
-  const [english, german] = await Promise.all([
-    prisma.language.findUnique({ where: { code: "en" } }),
-    prisma.language.findUnique({ where: { code: "de" } }),
-  ]);
+  const languages = await Promise.all(
+    catalogLanguageCodes.map((code) => prisma.language.findUniqueOrThrow({ where: { code } })),
+  );
+  const languageIds = new Map(languages.map((language) => [language.code, language.id]));
   for (const [index, topic] of topicDefinitions.entries()) {
     const record = await prisma.topic.upsert({
       where: { slug: topic.slug },
       update: { sortOrder: index, isActive: true },
       create: { slug: topic.slug, sortOrder: index, isActive: true },
     });
-    if (english) {
+    const localizedNames = {
+      en: getLocalizedGenericTopicName(topic.slug, "en"),
+      de: getLocalizedGenericTopicName(topic.slug, "de"),
+      ru: getLocalizedGenericTopicName(topic.slug, "ru"),
+      tr: getLocalizedGenericTopicName(topic.slug, "tr"),
+      uz: getLocalizedGenericTopicName(topic.slug, "uz"),
+    };
+    for (const [languageCode, name] of Object.entries(localizedNames) as Array<
+      [typeof catalogLanguageCodes[number], string]
+    >) {
+      const languageId = languageIds.get(languageCode);
+      if (!languageId) continue;
       await prisma.topicTranslation.upsert({
-        where: { topicId_languageId: { topicId: record.id, languageId: english.id } },
-        update: { name: topic.name },
-        create: { topicId: record.id, languageId: english.id, name: topic.name },
-      });
-    }
-    if (german) {
-      await prisma.topicTranslation.upsert({
-        where: { topicId_languageId: { topicId: record.id, languageId: german.id } },
-        update: { name: topic.germanName },
-        create: { topicId: record.id, languageId: german.id, name: topic.germanName },
+        where: { topicId_languageId: { topicId: record.id, languageId } },
+        update: { name },
+        create: { topicId: record.id, languageId, name },
       });
     }
   }

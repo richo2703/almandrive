@@ -11,11 +11,37 @@ catalogRouter.get("/languages", async (_req, res) => {
 });
 
 catalogRouter.get("/categories", async (_req, res) => {
+  const languageCode = await getRequestLanguageCode(_req.userId!);
   const categories = await prisma.licenseCategory.findMany({
     where: { isActive: true },
     orderBy: { sortOrder: "asc" },
   });
-  res.json(categories);
+  const categoryTranslations = await prisma.licenseCategoryTranslation.findMany({
+    where: {
+      categoryId: { in: categories.map((category) => category.id) },
+      language: { code: { in: [languageCode, "en"] } },
+    },
+    include: { language: { select: { code: true } } },
+  });
+  const translationsByCategory = new Map<string, (typeof categoryTranslations)[number][]>();
+  for (const translation of categoryTranslations) {
+    const list = translationsByCategory.get(translation.categoryId) ?? [];
+    list.push(translation);
+    translationsByCategory.set(translation.categoryId, list);
+  }
+  res.json(
+    categories.map((category) => ({
+      id: category.id,
+      code: category.code,
+      name:
+        translationsByCategory.get(category.id)?.find((translation) => translation.language.code === languageCode)?.name
+        ?? translationsByCategory.get(category.id)?.find((translation) => translation.language.code === "en")?.name
+        ?? category.name,
+      description: category.description,
+      sortOrder: category.sortOrder,
+      isActive: category.isActive,
+    })),
+  );
 });
 
 catalogRouter.get("/topics", async (_req, res) => {

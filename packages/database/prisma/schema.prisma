@@ -64,6 +64,7 @@ model Language {
   questionTranslations QuestionTranslation[]
   optionTranslations  AnswerOptionTranslation[]
   topicTranslations   TopicTranslation[]
+  categoryTranslations LicenseCategoryTranslation[]
   users               User[]
 }
 
@@ -77,6 +78,18 @@ model LicenseCategory {
   questions   Question[]
   users       User[]
   exams       ExamSession[]
+  translations LicenseCategoryTranslation[]
+}
+
+model LicenseCategoryTranslation {
+  id          String          @id @default(cuid())
+  categoryId  String
+  languageId  String
+  name        String
+  category    LicenseCategory  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  language    Language        @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, languageId])
 }
 
 model Topic {

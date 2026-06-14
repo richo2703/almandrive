@@ -8,6 +8,11 @@ import {
   licenseCategoryCodes,
 } from "@theorie-direkt/shared";
 import { databaseLanguageDefinitions } from "../src/language-definitions.js";
+import {
+  catalogLanguageCodes,
+  getLocalizedCategoryName,
+  getLocalizedGenericTopicName,
+} from "../src/catalog-localization.js";
 
 const prisma = new PrismaClient();
 
@@ -145,8 +150,9 @@ const demoQuestions: DemoQuestion[] = [
 ];
 
 async function main() {
+  const languageIds = new Map<string, string>();
   for (const { code, name, nativeName, isRtl, isContentActive } of languages) {
-    await prisma.language.upsert({
+    const language = await prisma.language.upsert({
       where: { code },
       update: {
         name,
@@ -164,10 +170,11 @@ async function main() {
         isContentActive,
       },
     });
+    languageIds.set(language.code, language.id);
   }
 
   for (const [index, code] of licenseCategoryCodes.entries()) {
-    await prisma.licenseCategory.upsert({
+    const category = await prisma.licenseCategory.upsert({
       where: { code },
       update: { name: categoryNames[code]!, sortOrder: index },
       create: {
@@ -177,21 +184,53 @@ async function main() {
         sortOrder: index,
       },
     });
+    for (const languageCode of catalogLanguageCodes) {
+      const name = getLocalizedCategoryName(code, languageCode);
+      const languageId = languageIds.get(languageCode);
+      if (!languageId) continue;
+      await prisma.licenseCategoryTranslation.upsert({
+        where: {
+          categoryId_languageId: {
+            categoryId: category.id,
+            languageId,
+          },
+        },
+        update: { name },
+        create: {
+          categoryId: category.id,
+          languageId,
+          name,
+        },
+      });
+    }
   }
 
   const english = await prisma.language.findUniqueOrThrow({ where: { code: "en" } });
 
-  for (const [index, [slug, name]] of topics.entries()) {
+  for (const [index, [slug]] of topics.entries()) {
     const topic = await prisma.topic.upsert({
       where: { slug },
       update: { sortOrder: index },
       create: { slug, sortOrder: index },
     });
-    await prisma.topicTranslation.upsert({
-      where: { topicId_languageId: { topicId: topic.id, languageId: english.id } },
-      update: { name },
-      create: { topicId: topic.id, languageId: english.id, name },
-    });
+    const localizedNames = {
+      en: getLocalizedGenericTopicName(slug, "en"),
+      de: getLocalizedGenericTopicName(slug, "de"),
+      ru: getLocalizedGenericTopicName(slug, "ru"),
+      tr: getLocalizedGenericTopicName(slug, "tr"),
+      uz: getLocalizedGenericTopicName(slug, "uz"),
+    };
+    for (const [languageCode, localizedName] of Object.entries(localizedNames) as Array<
+      [typeof catalogLanguageCodes[number], string]
+    >) {
+      const languageId = languageIds.get(languageCode);
+      if (!languageId) continue;
+      await prisma.topicTranslation.upsert({
+        where: { topicId_languageId: { topicId: topic.id, languageId } },
+        update: { name: localizedName },
+        create: { topicId: topic.id, languageId, name: localizedName },
+      });
+    }
   }
 
   const categories = new Map(
