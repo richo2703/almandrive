@@ -1,12 +1,13 @@
 import "./load-env.js";
 import { PrismaClient } from "@prisma/client";
+import { contentLanguageCodes } from "./language-definitions.js";
 
 const prisma = new PrismaClient();
 
 async function main() {
   const totalQuestions = await prisma.question.count();
   const languages = await prisma.language.findMany({
-    where: { code: { in: ["en", "de", "ru", "tr", "uz"] } },
+    where: { code: { in: contentLanguageCodes } },
     select: { id: true, code: true },
   });
   const languagesByCode = new Map(languages.map((language) => [language.code, language.id]));

@@ -10,6 +10,7 @@ import {
   normalizeCell,
   translationTargetLanguages,
 } from "./translation-workflow.js";
+import { databaseLanguageDefinitions } from "./language-definitions.js";
 
 const prisma = new PrismaClient();
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -49,6 +50,23 @@ function rowToOptionMap(question: {
   return new Map(question.answerOptions.map((option) => [option.key, option]));
 }
 
+async function ensureLanguage(code: string) {
+  const existing = await prisma.language.findUnique({ where: { code } });
+  if (existing) return existing;
+  const definition = databaseLanguageDefinitions.find((language) => language.code === code);
+  if (!definition) return null;
+  return prisma.language.create({
+    data: {
+      code: definition.code,
+      name: definition.name,
+      nativeName: definition.nativeName,
+      isRtl: definition.isRtl,
+      isInterfaceActive: true,
+      isContentActive: definition.isContentActive,
+    },
+  });
+}
+
 async function importRow(raw: unknown) {
   const row = importRowSchema.parse(raw);
   const question = await prisma.question.findUnique({
@@ -67,7 +85,7 @@ async function importRow(raw: unknown) {
     return { importedQuestion: false, importedOptions: 0 };
   }
 
-  const targetLanguage = await prisma.language.findUnique({ where: { code: row.targetLanguage } });
+  const targetLanguage = await ensureLanguage(row.targetLanguage);
   if (!targetLanguage) {
     console.warn(`[warn] language not found: ${row.targetLanguage} for ${row.questionExternalId}`);
     return { importedQuestion: false, importedOptions: 0 };

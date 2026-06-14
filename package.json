@@ -23,6 +23,8 @@
     "translations:status": "node --import tsx packages/database/src/translations-status.ts",
     "translations:split-ru": "node --import tsx packages/database/src/translations-split-ru.ts",
     "translations:merge-ru": "node --import tsx packages/database/src/translations-merge-ru.ts",
+    "translations:split-uz": "node --import tsx packages/database/src/translations-split-uz.ts",
+    "translations:merge-uz": "node --import tsx packages/database/src/translations-merge-uz.ts",
     "db:inspect": "node packages/database/scripts/db-inspect.mjs",
     "db:repair-questions": "node packages/database/scripts/db-repair-questions.mjs",
     "prisma:generate": "prisma generate --config packages/database/prisma.config.ts",

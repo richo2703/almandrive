@@ -19,6 +19,8 @@
     "translations:status": "node --import tsx src/translations-status.ts",
     "translations:split-ru": "node --import tsx src/translations-split-ru.ts",
     "translations:merge-ru": "node --import tsx src/translations-merge-ru.ts",
+    "translations:split-uz": "node --import tsx src/translations-split-uz.ts",
+    "translations:merge-uz": "node --import tsx src/translations-merge-uz.ts",
     "db:inspect": "node scripts/db-inspect.mjs",
     "db:repair-questions": "node scripts/db-repair-questions.mjs",
     "typecheck": "tsc --noEmit"

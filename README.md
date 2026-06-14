@@ -261,6 +261,13 @@ The merge script reconstructs `import/translations/completed-ru.csv` and validat
 
 Batch files are numbered in order, so the CSV header and row order stay stable across split and merge.
 
+The same workflow is available for Uzbek:
+
+```bash
+npm run translations:split-uz
+npm run translations:merge-uz
+```
+
 Run the application after import:
 
 ```bash

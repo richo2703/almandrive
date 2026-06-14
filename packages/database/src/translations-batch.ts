@@ -5,18 +5,15 @@ import { parse } from "csv-parse/sync";
 import {
   escapeCsvCell,
   translationCsvHeaders,
+  translationTargetLanguages,
   type TranslationCsvRow,
 } from "./translation-workflow.js";
 
-export const translationBatchLanguage = "ru" as const;
 export const translationBatchSize = 100;
 const sourceHeaders = translationCsvHeaders.slice(0, 9);
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const translationsDir = resolve(projectRoot, "import/translations");
-const batchDir = resolve(translationsDir, "batches", translationBatchLanguage);
-const missingFile = resolve(translationsDir, `missing-${translationBatchLanguage}.csv`);
-const completedFile = resolve(translationsDir, `completed-${translationBatchLanguage}.csv`);
 
 function serializeRow(row: TranslationCsvRow) {
   return translationCsvHeaders
@@ -55,7 +52,24 @@ function compareSourceColumns(left: TranslationCsvRow, right: TranslationCsvRow)
   return sourceHeaders.every((header) => left[header] === right[header]);
 }
 
-async function splitRu() {
+function assertLanguage(language: string): asserts language is (typeof translationTargetLanguages)[number] {
+  if (!translationTargetLanguages.includes(language as (typeof translationTargetLanguages)[number])) {
+    throw new Error(`Unsupported translation language "${language}".`);
+  }
+}
+
+function getPaths(language: (typeof translationTargetLanguages)[number]) {
+  const batchDir = resolve(translationsDir, "batches", language);
+  return {
+    batchDir,
+    missingFile: resolve(translationsDir, `missing-${language}.csv`),
+    completedFile: resolve(translationsDir, `completed-${language}.csv`),
+  };
+}
+
+async function splitLanguage(language: string) {
+  assertLanguage(language);
+  const { batchDir, missingFile } = getPaths(language);
   const rows = await parseCsvFile(missingFile);
   ensureHeaderShape(rows);
   await mkdir(batchDir, { recursive: true });
@@ -64,18 +78,20 @@ async function splitRu() {
     const start = index * translationBatchSize;
     const batchRows = rows.slice(start, start + translationBatchSize);
     const batchNumber = String(index + 1).padStart(3, "0");
-    const filePath = resolve(batchDir, `ru-batch-${batchNumber}.csv`);
+    const filePath = resolve(batchDir, `${language}-batch-${batchNumber}.csv`);
     await writeFile(filePath, `${serializeFile(batchRows)}\n`, "utf8");
     console.log(`Wrote ${batchRows.length} row(s) to ${filePath}`);
   }
   console.log(`Split ${rows.length} row(s) into ${expectedBatches} batch file(s).`);
 }
 
-async function mergeRu() {
+async function mergeLanguage(language: string) {
+  assertLanguage(language);
+  const { batchDir, missingFile, completedFile } = getPaths(language);
   const originalRows = await parseCsvFile(missingFile);
   ensureHeaderShape(originalRows);
   const files = (await readdir(batchDir))
-    .filter((name) => /^ru-batch-\d{3}-translated\.csv$/.test(name))
+    .filter((name) => new RegExp(`^${language}-batch-\\d{3}-translated\\.csv$`).test(name))
     .sort((left, right) => left.localeCompare(right));
 
   if (!files.length) {
@@ -119,10 +135,13 @@ async function mergeRu() {
   console.log(`Wrote ${mergedRows.length} row(s) to ${completedFile}`);
 }
 
-export async function runTranslationBatchCommand(command: "split" | "merge") {
+export async function runTranslationBatchCommand(
+  command: "split" | "merge",
+  language: string,
+) {
   if (command === "split") {
-    await splitRu();
+    await splitLanguage(language);
     return;
   }
-  await mergeRu();
+  await mergeLanguage(language);
 }

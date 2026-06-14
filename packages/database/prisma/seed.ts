@@ -7,25 +7,11 @@ import {
   languageCodes,
   licenseCategoryCodes,
 } from "@theorie-direkt/shared";
+import { databaseLanguageDefinitions } from "../src/language-definitions.js";
 
 const prisma = new PrismaClient();
 
-const languages = [
-  ["de", "German", "Deutsch", false],
-  ["en", "English", "English", false],
-  ["ru", "Russian", "Русский", false],
-  ["tr", "Turkish", "Türkçe", false],
-  ["uz", "Uzbek", "O‘zbekcha", false],
-  ["ar", "Arabic", "العربية", true],
-  ["ro", "Romanian", "Română", false],
-  ["pl", "Polish", "Polski", false],
-  ["hr", "Croatian", "Hrvatski", false],
-  ["pt", "Portuguese", "Português", false],
-  ["es", "Spanish", "Español", false],
-  ["it", "Italian", "Italiano", false],
-  ["fr", "French", "Français", false],
-  ["el", "Greek", "Ελληνικά", false],
-] as const;
+const languages = databaseLanguageDefinitions;
 
 const categoryNames: Record<string, string> = {
   AM: "Mopeds and light quadricycles",
@@ -159,8 +145,7 @@ const demoQuestions: DemoQuestion[] = [
 ];
 
 async function main() {
-  const contentLanguages = new Set(["en", "de", "ru", "tr", "uz"]);
-  for (const [code, name, nativeName, isRtl] of languages) {
+  for (const { code, name, nativeName, isRtl, isContentActive } of languages) {
     await prisma.language.upsert({
       where: { code },
       update: {
@@ -168,7 +153,7 @@ async function main() {
         nativeName,
         isRtl,
         isInterfaceActive: true,
-        isContentActive: contentLanguages.has(code),
+        isContentActive,
       },
       create: {
         code,
@@ -176,7 +161,7 @@ async function main() {
         nativeName,
         isRtl,
         isInterfaceActive: true,
-        isContentActive: contentLanguages.has(code),
+        isContentActive,
       },
     });
   }
