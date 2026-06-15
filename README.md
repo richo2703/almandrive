@@ -1,4 +1,4 @@
-# Theorie Direkt
+# Alman Drive
 
 Production-oriented MVP monorepo for a Telegram Mini App that teaches German driving theory using original or user-owned question material.
 
@@ -36,18 +36,21 @@ Requirements: Node.js 20+, npm, Docker with Docker Compose.
 cp .env.example .env
 docker compose up -d
 npm install
+npm run prisma:generate
 npm run prisma:migrate -- --name init
 npm run seed
 npm run dev
 ```
 
-Open `http://localhost:5173`. The example environment enables a local demo identity with `DEV_AUTH_ENABLED=true`, so Telegram is not required for local UI development.
+Open `http://localhost:5173`. For local UI development, set `DEV_AUTH_ENABLED=true` in your `.env` if you want the demo Telegram identity without real Telegram initData.
 
 The services use:
 
 - Web: `http://localhost:5173`
 - API: `http://localhost:4000`
 - PostgreSQL: `localhost:5432`
+
+For local admin access without Telegram, set `DEV_ADMIN_TELEGRAM_ID` to the same numeric Telegram ID you want treated as an admin, and keep `DEV_AUTH_ENABLED=true`.
 
 ## Telegram setup
 

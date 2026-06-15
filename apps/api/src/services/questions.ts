@@ -79,7 +79,7 @@ export async function serializeQuestion(
       topic: true,
     },
   });
-  const bookmark = await prisma.bookmark.findUnique({
+  const bookmark = await prisma.savedQuestion.findUnique({
     where: { userId_questionId: { userId, questionId } },
   });
   const translation = await resolveQuestionTranslation(questionId, languageCode);

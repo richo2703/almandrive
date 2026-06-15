@@ -18,6 +18,13 @@ enum ExamStatus {
   ABANDONED
 }
 
+enum QuizMode {
+  PRACTICE
+  EXAM
+  MISTAKES
+  SAVED
+}
+
 enum SubscriptionStatus {
   INACTIVE
   ACTIVE
@@ -32,23 +39,64 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum AccessSource {
+  PAYMENT
+  PROMO_CODE
+  MANUAL_ADMIN
+  MIGRATION
+}
+
+enum PaymentOrderStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PromoCodeType {
+  FREE_ACCESS
+  PERCENT_DISCOUNT
+  FIXED_STARS_DISCOUNT
+}
+
+enum BannerPlacement {
+  HOME_TOP
+  HOME_MIDDLE
+  PRICING_TOP
+  QUIZ_BOTTOM
+  LEARN_TOP
+}
+
 model User {
   id                  String        @id @default(cuid())
   telegramId          BigInt        @unique
   username            String?
   firstName           String?
   lastName            String?
+  languageCode        String?
+  photoUrl            String?
+  firstSeenAt         DateTime      @default(now())
+  lastSeenAt          DateTime      @default(now())
+  isBlocked           Boolean       @default(false)
+  isAdmin             Boolean       @default(false)
+  adminNote           String?
   interfaceLanguageId String?
   selectedCategoryId  String?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   interfaceLanguage   Language?     @relation(fields: [interfaceLanguageId], references: [id])
   selectedCategory    LicenseCategory? @relation(fields: [selectedCategoryId], references: [id])
-  answers             UserAnswer[]
-  bookmarks           Bookmark[]
-  examSessions        ExamSession[]
+  questionProgress    UserQuestionProgress[]
+  topicProgresses     UserTopicProgress[]
+  savedQuestions      SavedQuestion[]
+  quizSessions        QuizSession[]
+  userMistakes        UserMistake[]
   subscriptions       Subscription[]
   payments            Payment[]
+  paymentOrders       PaymentOrder[]
+  userAccesses        UserAccess[]
+  promoCodeUsages     PromoCodeUsage[]
+  revokedAccesses     UserAccess[] @relation("UserAccessRevoker")
 
   @@index([telegramId])
 }
@@ -77,8 +125,9 @@ model LicenseCategory {
   isActive    Boolean     @default(true)
   questions   Question[]
   users       User[]
-  exams       ExamSession[]
+  quizSessions QuizSession[]
   translations LicenseCategoryTranslation[]
+  progress    UserQuestionProgress[]
 }
 
 model LicenseCategoryTranslation {
@@ -99,6 +148,9 @@ model Topic {
   isActive     Boolean               @default(true)
   questions    Question[]
   translations TopicTranslation[]
+  progress     UserQuestionProgress[]
+  topicProgress UserTopicProgress[]
+  quizSessions QuizSession[]
 }
 
 model TopicTranslation {
@@ -128,9 +180,10 @@ model Question {
   topic         Topic                 @relation(fields: [topicId], references: [id])
   translations  QuestionTranslation[]
   answerOptions AnswerOption[]
-  userAnswers   UserAnswer[]
-  bookmarks     Bookmark[]
-  examAnswers   ExamAnswer[]
+  userProgress  UserQuestionProgress[]
+  savedQuestions SavedQuestion[]
+  quizAnswers   QuizAnswer[]
+  userMistakes  UserMistake[]
 
   @@index([categoryId, topicId, isActive])
 }
@@ -170,20 +223,48 @@ model AnswerOptionTranslation {
   @@unique([answerOptionId, languageId])
 }
 
-model UserAnswer {
+model UserQuestionProgress {
   id                String   @id @default(cuid())
   userId            String
   questionId        String
   selectedOptionIds String[]
+  selectedAnswerKey String?
   isCorrect         Boolean
   answeredAt        DateTime @default(now())
+  languageCode      String?
+  licenseCategoryId  String?
+  topicId           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   question          Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  licenseCategory    LicenseCategory? @relation(fields: [licenseCategoryId], references: [id], onDelete: SetNull)
+  topic             Topic? @relation(fields: [topicId], references: [id], onDelete: SetNull)
 
   @@index([userId, questionId, answeredAt])
+  @@index([userId, topicId, answeredAt])
+  @@map("UserAnswer")
 }
 
-model Bookmark {
+model UserTopicProgress {
+  id               String   @id @default(cuid())
+  userId           String
+  topicId          String
+  totalQuestions   Int      @default(0)
+  answeredQuestions Int     @default(0)
+  correctAnswers   Int      @default(0)
+  wrongAnswers     Int      @default(0)
+  completedAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic            Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, topicId])
+  @@index([userId, completedAt])
+}
+
+model SavedQuestion {
   id         String   @id @default(cuid())
   userId     String
   questionId String
@@ -192,36 +273,62 @@ model Bookmark {
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@unique([userId, questionId])
+  @@map("Bookmark")
 }
 
-model ExamSession {
+model UserMistake {
+  id            String   @id @default(cuid())
+  userId        String
+  questionId    String
+  mistakeCount  Int      @default(1)
+  lastMistakeAt DateTime @default(now())
+  resolvedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question      Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@index([userId, resolvedAt, lastMistakeAt])
+}
+
+model QuizSession {
   id            String          @id @default(cuid())
   userId        String
   categoryId    String
+  topicId       String?
+  languageCode  String?
+  mode          QuizMode        @default(PRACTICE)
   status        ExamStatus      @default(IN_PROGRESS)
   questionIds   String[]
+  correctAnswers Int             @default(0)
+  wrongAnswers   Int             @default(0)
   score         Int?
   totalQuestions Int
   startedAt     DateTime        @default(now())
   finishedAt    DateTime?
   user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   category      LicenseCategory @relation(fields: [categoryId], references: [id])
-  answers       ExamAnswer[]
+  topic         Topic?          @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  answers       QuizAnswer[]
 
   @@index([userId, status])
+  @@index([userId, mode, status])
+  @@map("ExamSession")
 }
 
-model ExamAnswer {
+model QuizAnswer {
   id                String      @id @default(cuid())
-  examSessionId     String
+  quizSessionId     String
   questionId        String
   selectedOptionIds String[]
   isCorrect         Boolean
   answeredAt        DateTime    @default(now())
-  examSession       ExamSession @relation(fields: [examSessionId], references: [id], onDelete: Cascade)
+  quizSession       QuizSession @relation(fields: [quizSessionId], references: [id], onDelete: Cascade)
   question          Question    @relation(fields: [questionId], references: [id])
 
-  @@unique([examSessionId, questionId])
+  @@unique([quizSessionId, questionId])
+  @@map("ExamAnswer")
 }
 
 model Subscription {
@@ -247,4 +354,151 @@ model Payment {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id             String          @id @default(cuid())
+  title          String
+  description    String?
+  priceStars     Int
+  accessDays     Int?
+  isLifetime     Boolean         @default(false)
+  isActive       Boolean         @default(true)
+  sortOrder      Int             @default(0)
+  badgeText      String?
+  oldPriceStars  Int?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  paymentOrders  PaymentOrder[]
+  userAccesses   UserAccess[]
+}
+
+model PaymentOrder {
+  id                       String             @id @default(cuid())
+  userId                   String
+  productId                String
+  promoCodeId              String?
+  amountStarsOriginal      Int
+  discountStars            Int                @default(0)
+  amountStarsFinal         Int
+  status                   PaymentOrderStatus @default(PENDING)
+  payload                  String             @unique
+  telegramPaymentChargeId  String?            @unique
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+  paidAt                   DateTime?
+  user                     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product                  Product            @relation(fields: [productId], references: [id])
+  promoCode                PromoCode?         @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  userAccesses             UserAccess[]
+}
+
+model UserAccess {
+  id                  String        @id @default(cuid())
+  userId              String
+  productId           String?
+  paymentOrderId      String?
+  promoCodeId         String?
+  source              AccessSource
+  startsAt            DateTime
+  expiresAt           DateTime?
+  isLifetime          Boolean       @default(false)
+  isActive            Boolean       @default(true)
+  revokedAt           DateTime?
+  revokedByAdminId    String?
+  internalNote        String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product             Product?      @relation(fields: [productId], references: [id], onDelete: SetNull)
+  paymentOrder        PaymentOrder? @relation(fields: [paymentOrderId], references: [id], onDelete: SetNull)
+  promoCode           PromoCode?    @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  revokedByAdmin      User?         @relation("UserAccessRevoker", fields: [revokedByAdminId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isActive, revokedAt])
+}
+
+model PromoCode {
+  id                String            @id @default(cuid())
+  code              String            @unique
+  type              PromoCodeType
+  discountPercent   Int?
+  discountStars     Int?
+  accessDays        Int?
+  isLifetime        Boolean           @default(false)
+  maxUses           Int?
+  maxUsesPerUser    Int?
+  validFrom         DateTime?
+  validUntil       DateTime?
+  isActive          Boolean           @default(true)
+  sortOrder         Int               @default(0)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  paymentOrders     PaymentOrder[]
+  accesses          UserAccess[]
+  usages            PromoCodeUsage[]
+}
+
+model PromoCodeUsage {
+  id                 String     @id @default(cuid())
+  promoCodeId        String
+  userId             String
+  paymentOrderId     String?
+  userAccessId       String?
+  discountStarsApplied Int      @default(0)
+  usedAt             DateTime   @default(now())
+  createdAt          DateTime   @default(now())
+  promoCode          PromoCode  @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([promoCodeId, userId, usedAt])
+}
+
+model Banner {
+  id           String          @id @default(cuid())
+  imageUrl     String?
+  title        String
+  subtitle     String?
+  buttonText   String?
+  buttonUrl    String?
+  placement    BannerPlacement
+  languageCode String?
+  isActive     Boolean         @default(true)
+  sortOrder    Int             @default(0)
+  validFrom    DateTime?
+  validUntil   DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model Promotion {
+  id              String      @id @default(cuid())
+  imageUrl        String?
+  title           String
+  description     String?
+  buttonText      String?
+  buttonUrl       String?
+  linkedProductId  String?
+  promoCodeId      String?
+  languageCode    String?
+  isActive        Boolean     @default(true)
+  validFrom       DateTime?
+  validUntil      DateTime?
+  sortOrder       Int         @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model News {
+  id           String   @id @default(cuid())
+  title        String
+  excerpt      String?
+  body         String
+  imageUrl     String?
+  languageCode String?
+  isPublished  Boolean  @default(false)
+  publishedAt  DateTime?
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

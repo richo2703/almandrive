@@ -18,6 +18,7 @@ interface AppState {
   ready: boolean;
   error: string | null;
   firstName: string;
+  isAdmin: boolean;
   category: string;
   setCategory(value: string): void;
   language: SupportedLanguage;
@@ -31,6 +32,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [firstName, setFirstName] = useState("Driver");
+  const [isAdmin, setIsAdmin] = useState(false);
   const [category, setCategoryState] = useState(localStorage.getItem("category") ?? "");
   const storedLanguage = localStorage.getItem("language") ?? "en";
   const [language, setLanguageState] = useState<SupportedLanguage>(
@@ -44,6 +46,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     authenticate(webApp?.initData ?? "")
       .then((user) => {
         setFirstName(user.firstName ?? "Driver");
+        setIsAdmin(user.isAdmin);
         if (
           !localStorage.getItem("language") &&
           isSupportedLanguage(user.interfaceLanguage)
@@ -68,6 +71,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       ready,
       error,
       firstName,
+      isAdmin,
       category,
       setCategory(value: string) {
         localStorage.setItem("category", value);
@@ -83,7 +87,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       t: (key, params) => translate(language, key, params),
     }),
-    [ready, error, firstName, category, language],
+    [ready, error, firstName, isAdmin, category, language],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

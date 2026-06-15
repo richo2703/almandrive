@@ -233,6 +233,22 @@ async function main() {
     }
   }
 
+  const defaultProducts = [
+    { title: "1 day", description: "1 day access", priceStars: 25, accessDays: 1, isLifetime: false, isActive: true, sortOrder: 0, badgeText: null, oldPriceStars: null },
+    { title: "7 days", description: "7 days access", priceStars: 99, accessDays: 7, isLifetime: false, isActive: true, sortOrder: 1, badgeText: "Popular", oldPriceStars: null },
+    { title: "30 days", description: "30 days access", priceStars: 249, accessDays: 30, isLifetime: false, isActive: true, sortOrder: 2, badgeText: "Best value", oldPriceStars: null },
+    { title: "Lifetime", description: "Lifetime access", priceStars: 799, accessDays: null, isLifetime: true, isActive: true, sortOrder: 3, badgeText: null, oldPriceStars: null },
+  ] as const;
+
+  for (const product of defaultProducts) {
+    const existing = await prisma.product.findFirst({ where: { title: product.title } });
+    if (existing) {
+      await prisma.product.update({ where: { id: existing.id }, data: product });
+    } else {
+      await prisma.product.create({ data: product });
+    }
+  }
+
   const categories = new Map(
     (await prisma.licenseCategory.findMany()).map((category) => [category.code, category]),
   );

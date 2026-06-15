@@ -9,6 +9,7 @@ import { QuestionView } from "../components/QuestionView";
 export function ExamPage() {
   const { category, t } = useApp();
   const navigate = useNavigate();
+  const [access, setAccess] = useState<boolean | null>(null);
   const [exam, setExam] = useState<{ id: string; total: number; index: number } | null>(null);
   const [question, setQuestion] = useState<ApiQuestion | null>(null);
   const [result, setResult] = useState<{ score: number; totalQuestions: number; percentage: number } | null>(null);
@@ -17,7 +18,16 @@ export function ExamPage() {
 
   useEffect(() => {
     if (!category) navigate("/categories", { replace: true });
-  }, [category, navigate]);
+    if (access === null && category) {
+      api.access().then((result) => {
+        if (!result.hasActiveAccess) {
+          navigate("/pricing", { replace: true });
+          return;
+        }
+        setAccess(true);
+      }).catch(() => navigate("/pricing", { replace: true }));
+    }
+  }, [access, category, navigate]);
 
   async function start() {
     setLoading(true);
@@ -38,6 +48,7 @@ export function ExamPage() {
   }
 
   if (!category) return <div className="loading">{t("common.loading")}</div>;
+  if (access === null) return <div className="loading">{t("common.loading")}</div>;
 
   if (result) return (
     <section className="exam-result">

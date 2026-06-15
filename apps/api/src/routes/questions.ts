@@ -10,6 +10,7 @@ import {
   gradeQuestion,
   serializeQuestion,
 } from "../services/questions.js";
+import { recordQuestionProgress } from "../services/user-progress.js";
 import {
   getRequestCategoryCode,
   getRequestLanguageCode,
@@ -25,7 +26,7 @@ questionRouter.get("/next", async (req, res) => {
   }
   const topic = req.query.topic ? String(req.query.topic) : undefined;
   const languageCode = await getRequestLanguageCode(req.userId!);
-  const answered = await prisma.userAnswer.findMany({
+  const answered = await prisma.userQuestionProgress.findMany({
     where: { userId: req.userId! },
     select: { questionId: true },
     distinct: ["questionId"],
@@ -57,13 +58,12 @@ questionRouter.post("/:id/answer", async (req, res) => {
   const { optionIds } = answerRequestSchema.parse(req.body);
   const languageCode = await getRequestLanguageCode(req.userId!);
   const grade = await gradeQuestion(req.params.id, optionIds);
-  await prisma.userAnswer.create({
-    data: {
-      userId: req.userId!,
-      questionId: req.params.id,
-      selectedOptionIds: [...new Set(optionIds)],
-      isCorrect: grade.isCorrect,
-    },
+  await recordQuestionProgress({
+    userId: req.userId!,
+    questionId: req.params.id,
+    selectedOptionIds: optionIds,
+    isCorrect: grade.isCorrect,
+    languageCode,
   });
   const question = await serializeQuestion(req.params.id, req.userId!, languageCode);
   res.json({ ...grade, explanation: question.explanation });
@@ -71,16 +71,36 @@ questionRouter.post("/:id/answer", async (req, res) => {
 
 questionRouter.post("/:id/bookmark", async (req, res) => {
   const { bookmarked } = bookmarkRequestSchema.parse(req.body);
-  const existing = await prisma.bookmark.findUnique({
+  const existing = await prisma.savedQuestion.findUnique({
     where: { userId_questionId: { userId: req.userId!, questionId: req.params.id } },
   });
   const shouldBookmark = bookmarked ?? !existing;
   if (shouldBookmark && !existing) {
-    await prisma.bookmark.create({
+    await prisma.savedQuestion.create({
       data: { userId: req.userId!, questionId: req.params.id },
     });
   } else if (!shouldBookmark && existing) {
-    await prisma.bookmark.delete({ where: { id: existing.id } });
+    await prisma.savedQuestion.delete({ where: { id: existing.id } });
   }
   res.json({ bookmarked: shouldBookmark });
+});
+
+questionRouter.post("/:id/save", async (req, res) => {
+  const existing = await prisma.savedQuestion.findUnique({
+    where: { userId_questionId: { userId: req.userId!, questionId: req.params.id } },
+  });
+  if (!existing) {
+    await prisma.savedQuestion.create({ data: { userId: req.userId!, questionId: req.params.id } });
+  }
+  res.json({ saved: true });
+});
+
+questionRouter.delete("/:id/save", async (req, res) => {
+  const existing = await prisma.savedQuestion.findUnique({
+    where: { userId_questionId: { userId: req.userId!, questionId: req.params.id } },
+  });
+  if (existing) {
+    await prisma.savedQuestion.delete({ where: { id: existing.id } });
+  }
+  res.json({ saved: false });
 });

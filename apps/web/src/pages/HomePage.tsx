@@ -6,6 +6,7 @@ import {
   Crown,
   Languages,
   Timer,
+  UserCircle2,
   TriangleAlert,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -37,9 +38,10 @@ export function HomePage() {
         <Link to="/mistakes"><TriangleAlert /><span><strong>{t("mistakes.title")}</strong><small>{t("home.mistakesDescription")}</small></span><ArrowRight /></Link>
         <Link to="/bookmarks"><Bookmark /><span><strong>{t("home.bookmarks")}</strong><small>{t("home.bookmarksDescription")}</small></span><ArrowRight /></Link>
         <Link to="/statistics"><BarChart3 /><span><strong>{t("statistics.title")}</strong><small>{t("home.statisticsDescription")}</small></span><ArrowRight /></Link>
+        <Link to="/profile"><UserCircle2 /><span><strong>{t("profile.title")}</strong><small>{t("profile.homeDescription")}</small></span><ArrowRight /></Link>
         <Link to="/language"><Languages /><span><strong>{t("home.language")}</strong><small>{t("home.languageDescription")}</small></span><ArrowRight /></Link>
         <Link to="/categories"><BookOpen /><span><strong>{t("home.categories")}</strong><small>{t("home.categoryDescription", { category: currentCategory })}</small></span><ArrowRight /></Link>
-        <Link to="/premium"><Crown /><span><strong>{t("home.premium")}</strong><small>{t("home.comingSoon")}</small></span><ArrowRight /></Link>
+        <Link to="/pricing"><Crown /><span><strong>{t("home.premium")}</strong><small>{t("home.comingSoon")}</small></span><ArrowRight /></Link>
       </section>
     </>
   );

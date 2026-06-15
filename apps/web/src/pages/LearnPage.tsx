@@ -6,6 +6,7 @@ import { ApiError, api, type Topic } from "../lib/api";
 
 export function LearnPage() {
   const { category, t } = useApp();
+  const [access, setAccess] = useState<boolean | null>(null);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
@@ -16,11 +17,21 @@ export function LearnPage() {
       navigate("/categories", { replace: true });
       return;
     }
+    if (access === null) {
+      api.access().then((result) => {
+        if (!result.hasActiveAccess) {
+          navigate("/pricing", { replace: true });
+          return;
+        }
+        setAccess(true);
+      }).catch(() => navigate("/pricing", { replace: true }));
+      return;
+    }
     if (mode !== "topic" || topics.length) return;
     api.topics()
       .then(setTopics)
       .catch((error: unknown) => setPageError(error instanceof Error ? error.message : "Failed to load topics."));
-  }, [category, mode, navigate, topics.length]);
+  }, [access, category, mode, navigate, topics.length]);
 
   async function start(topic?: string) {
     setLoading(topic ?? "all");
@@ -45,6 +56,7 @@ export function LearnPage() {
   }
 
   if (!category) return <div className="loading">{t("common.loading")}</div>;
+  if (access === null) return <div className="loading">{t("common.loading")}</div>;
 
   return (
     <section>

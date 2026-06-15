@@ -24,6 +24,12 @@ async function upsertTelegramUser(
     username: telegramUser.username,
     firstName: telegramUser.first_name,
     lastName: telegramUser.last_name,
+    languageCode: telegramUser.language_code,
+    photoUrl: telegramUser.photo_url,
+    lastSeenAt: new Date(),
+    isAdmin:
+      env.ADMIN_TELEGRAM_IDS.includes(telegramId) ||
+      env.DEV_ADMIN_TELEGRAM_ID === telegramId,
   };
 
   try {
@@ -33,6 +39,7 @@ async function upsertTelegramUser(
       create: {
         telegramId,
         ...userData,
+        firstSeenAt: new Date(),
         interfaceLanguageId,
         selectedCategoryId,
       },
@@ -57,11 +64,13 @@ authRouter.post("/telegram", async (req, res) => {
   const { initData } = telegramAuthSchema.parse(req.body);
   let telegramUser: TelegramUser;
 
-  if (!initData && env.DEV_AUTH_ENABLED) {
+  if (env.NODE_ENV !== "production" && !initData && env.DEV_AUTH_ENABLED) {
+    const devTelegramId = env.DEV_ADMIN_TELEGRAM_ID ?? DEVELOPMENT_TELEGRAM_ID;
     telegramUser = {
-      id: Number(DEVELOPMENT_TELEGRAM_ID),
+      id: Number(devTelegramId),
       first_name: "Local",
       username: "local_demo",
+      language_code: "en",
     };
   } else {
     if (!env.TELEGRAM_BOT_TOKEN) {
@@ -88,6 +97,7 @@ authRouter.post("/telegram", async (req, res) => {
       id: user.id,
       firstName: user.firstName,
       username: user.username,
+      isAdmin: user.isAdmin,
       interfaceLanguage: user.interfaceLanguage?.code ?? "en",
       category: user.selectedCategory?.code ?? "B",
     },

@@ -13,6 +13,7 @@
     "dev:bot": "npm run dev -w @theorie-direkt/bot",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
+    "start": "node scripts/start.mjs",
     "seed": "tsx packages/database/prisma/seed.ts",
     "import:questions": "tsx packages/database/src/import-questions.ts",
     "import:my-base": "tsx packages/database/src/import-my-base.ts",
