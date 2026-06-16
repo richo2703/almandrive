@@ -35,11 +35,10 @@
     "@theorie-direkt/shared": "*",
     "csv-parse": "^5.6.0",
     "dotenv": "^16.4.7",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
     "prisma": "^6.4.1",
     "tsx": "^4.19.3",
-    "typescript": "^5.7.3"
-  }
+    "typescript": "^5.7.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {}
 }
