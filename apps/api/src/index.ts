@@ -16,7 +16,14 @@ import { errorHandler } from "./middleware/error.js";
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    useDefaults: true,
+    directives: {
+      scriptSrc: ["'self'", "https://telegram.org"],
+    },
+  },
+}));
 app.use(cors({ origin: env.WEB_APP_URL, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
 

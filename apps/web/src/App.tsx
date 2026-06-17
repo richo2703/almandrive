@@ -55,6 +55,7 @@ export function App() {
     <BrowserRouter>
       <TitleSync />
       <Routes>
+        <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/language" element={<LanguagePage />} />
