@@ -2,7 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import type { ApiQuestion } from "@theorie-direkt/shared";
-import { api, type AnswerResult } from "../lib/api";
+import { ApiError, api, type AnswerResult } from "../lib/api";
 import { QuestionView } from "../components/QuestionView";
 import { useApp } from "../context/AppContext";
 
@@ -31,10 +31,22 @@ export function QuestionPage() {
           return;
         }
         setAccess(true);
-      }).catch(() => navigate("/pricing", { replace: true }));
+      }).catch((error: unknown) => {
+        if (error instanceof ApiError && error.code === "payment_required") {
+          navigate("/pricing", { replace: true });
+          return;
+        }
+        navigate("/pricing", { replace: true });
+      });
       return;
     }
-    if (id) api.question(id).then(setQuestion).catch(() => navigate("/learn"));
+    if (id) api.question(id).then(setQuestion).catch((error: unknown) => {
+      if (error instanceof ApiError && error.code === "payment_required") {
+        navigate("/pricing", { replace: true });
+        return;
+      }
+      navigate("/learn");
+    });
   }, [access, category, id, navigate]);
 
   if (!category) return <div className="loading">{t("common.loading")}</div>;

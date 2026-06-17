@@ -3,10 +3,13 @@ import { prisma } from "@theorie-direkt/database";
 import { z } from "zod";
 import { examAnswerSchema, examStartSchema } from "@theorie-direkt/shared";
 import { gradeQuestion, getAvailableQuestionIds, serializeQuestion } from "../services/questions.js";
+import { requireActiveAccess } from "../middleware/access.js";
 import { finishQuizSession, recordQuestionProgress } from "../services/user-progress.js";
 import { getRequestLanguageCode } from "../services/request-context.js";
 
 export const examRouter = Router();
+
+examRouter.use(requireActiveAccess);
 
 const quizSessionStartSchema = examStartSchema.extend({
   topic: z.string().optional(),

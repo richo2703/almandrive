@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { prisma } from "@theorie-direkt/database";
 import { z } from "zod";
-import { requireAdmin } from "../middleware/admin.js";
+import { requireAdmin, resolveAdminIdentity } from "../middleware/admin-session.js";
 import { env } from "../config/env.js";
+import { createAdminSessionToken, clearAdminSessionCookie, setAdminSessionCookie, verifyAdminPassword } from "../utils/admin-session.js";
 
 export const adminRouter = Router();
-adminRouter.use(requireAdmin);
 
 const productSchema = z.object({
   title: z.string().min(1),
@@ -116,6 +116,53 @@ function serializePromoCode(promoCode: any) {
       user: usage.user ? serializeUser(usage.user) : null,
     })),
   };
+}
+
+adminRouter.post("/login", async (req, res) => {
+  const body = z.object({ username: z.string().min(1), password: z.string().min(1) }).safeParse(req.body);
+  if (!body.success) {
+    res.status(400).json({ error: "Validation failed." });
+    return;
+  }
+  if (!env.ADMIN_SESSION_SECRET || !env.ADMIN_PASSWORD_HASH) {
+    res.status(503).json({ error: "Admin login is not configured." });
+    return;
+  }
+  if (body.data.username !== env.ADMIN_USERNAME) {
+    res.status(401).json({ error: "Invalid credentials." });
+    return;
+  }
+  if (!verifyAdminPassword(body.data.password, env.ADMIN_PASSWORD_HASH)) {
+    res.status(401).json({ error: "Invalid credentials." });
+    return;
+  }
+  const token = createAdminSessionCookie(body.data.username);
+  setAdminSessionCookie(res, token);
+  res.json({ ok: true, username: body.data.username });
+});
+
+adminRouter.post("/logout", async (_req, res) => {
+  clearAdminSessionCookie(res);
+  res.json({ ok: true });
+});
+
+adminRouter.get("/me", async (req, res) => {
+  const identity = await resolveAdminIdentity(req);
+  if (!identity) {
+    res.status(401).json({ error: "Access denied." });
+    return;
+  }
+  res.json({ ok: true, username: identity.username });
+});
+
+adminRouter.use(requireAdmin);
+
+function createAdminSessionCookie(username: string) {
+  if (!env.ADMIN_SESSION_SECRET) throw new Error("ADMIN_SESSION_SECRET is not configured.");
+  return createAdminSessionToken(
+    { username, expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000 },
+    env.ADMIN_SESSION_SECRET,
+  );
 }
 
 adminRouter.get("/dashboard", async (_req, res) => {

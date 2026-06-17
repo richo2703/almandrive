@@ -28,7 +28,7 @@ app.use("/api", requireAuth, progressRouter);
 app.use("/api", requireAuth, shopRouter);
 app.use("/api/exam", requireAuth, examRouter);
 app.use("/api/quiz-sessions", requireAuth, examRouter);
-app.use("/api/admin", requireAuth, adminRouter);
+app.use("/api/admin", adminRouter);
 const webDistPath = resolve(process.cwd(), "apps/web/dist");
 if (existsSync(webDistPath)) {
   app.use(express.static(webDistPath));

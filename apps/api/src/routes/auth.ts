@@ -64,24 +64,44 @@ authRouter.post("/telegram", async (req, res) => {
   const { initData } = telegramAuthSchema.parse(req.body);
   let telegramUser: TelegramUser;
 
-  if (env.NODE_ENV !== "production" && !initData && env.DEV_AUTH_ENABLED) {
-    const devTelegramId = env.DEV_ADMIN_TELEGRAM_ID ?? DEVELOPMENT_TELEGRAM_ID;
-    telegramUser = {
-      id: Number(devTelegramId),
-      first_name: "Local",
-      username: "local_demo",
-      language_code: "en",
-    };
+  const allowDevelopmentAuth =
+    env.DEV_AUTH_ENABLED &&
+    (env.NODE_ENV !== "production" || env.DEV_AUTH_ALLOW_IN_PRODUCTION);
+
+  if (!initData) {
+    if (allowDevelopmentAuth) {
+      const devTelegramId = env.DEV_ADMIN_TELEGRAM_ID ?? DEVELOPMENT_TELEGRAM_ID;
+      telegramUser = {
+        id: Number(devTelegramId),
+        first_name: "Local",
+        username: "local_demo",
+        language_code: "en",
+      };
+    } else {
+      res.status(400).json({
+        error: "telegram_init_data_required",
+        message: "Please open Alman Drive inside Telegram.",
+      });
+      return;
+    }
   } else {
     if (!env.TELEGRAM_BOT_TOKEN) {
       res.status(503).json({ error: "TELEGRAM_BOT_TOKEN is not configured." });
       return;
     }
-    telegramUser = validateTelegramInitData(
-      initData,
-      env.TELEGRAM_BOT_TOKEN,
-      env.TELEGRAM_AUTH_MAX_AGE_SECONDS,
-    );
+    try {
+      telegramUser = validateTelegramInitData(
+        initData,
+        env.TELEGRAM_BOT_TOKEN,
+        env.TELEGRAM_AUTH_MAX_AGE_SECONDS,
+      );
+    } catch (error) {
+      res.status(401).json({
+        error: "telegram_init_data_invalid",
+        message: error instanceof Error ? error.message : "Invalid Telegram initData.",
+      });
+      return;
+    }
   }
 
   const english = await prisma.language.findUniqueOrThrow({ where: { code: "en" } });

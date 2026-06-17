@@ -20,6 +20,7 @@ export class ApiError extends Error {
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
@@ -27,7 +28,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     },
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new ApiError(body.error ?? `Request failed (${response.status})`, response.status, body.code);
+  if (!response.ok) throw new ApiError(body.message ?? body.error ?? `Request failed (${response.status})`, response.status, body.code);
   return body as T;
 }
 
@@ -134,6 +135,9 @@ export const api = {
   banners: () => request<Banner[]>("/api/banners"),
   promotions: () => request<Promotion[]>("/api/promotions"),
   news: () => request<NewsItem[]>("/api/news"),
+  adminLogin: (username: string, password: string) => request<AdminAuthResult>("/api/admin/login", { method: "POST", body: JSON.stringify({ username, password }) }),
+  adminLogout: () => request<{ ok: boolean }>("/api/admin/logout", { method: "POST" }),
+  adminMe: () => request<AdminAuthResult>("/api/admin/me"),
   adminDashboard: () => request<AdminDashboard>("/api/admin/dashboard"),
   adminProducts: () => request<Product[]>("/api/admin/products"),
   adminCreateProduct: (payload: Partial<ProductInput>) =>
@@ -554,6 +558,11 @@ export interface CreateInvoiceResult {
   amountStarsOriginal: number;
   discountStars: number;
   amountStarsFinal: number;
+}
+
+export interface AdminAuthResult {
+  ok: boolean;
+  username: string;
 }
 
 export interface AdminDashboard {

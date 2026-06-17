@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { useEffect, useState, type FormEvent } from "react";
+import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { api, type Banner, type BannerInput, type NewsInput, type NewsItem, type PaymentOrder, type Product, type ProductInput, type PromoCode, type PromoCodeInput, type Promotion, type PromotionInput, type UserDetail, type UserRecord } from "../lib/api";
 
@@ -25,9 +25,54 @@ function AdminDenied() {
   );
 }
 
+export function AdminLoginPage() {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      await api.adminLogin(username.trim(), password);
+      window.location.href = "/admin";
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Login failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <section className="admin-page">
+      <p className="eyebrow">Admin</p>
+      <h1>Login</h1>
+      <p className="page-intro">Use your admin username and password to open the control panel.</p>
+      <form className="card-grid" onSubmit={submit}>
+        <label style={{ display: "grid", gap: 6 }}>
+          <span>Username</span>
+          <input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" />
+        </label>
+        <label style={{ display: "grid", gap: 6 }}>
+          <span>Password</span>
+          <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" />
+        </label>
+        {error ? <div className="feedback feedback--wrong"><strong>{error}</strong></div> : null}
+        <div style={{ display: "flex", gap: 10 }}>
+          <button className="button button--primary" type="submit" disabled={loading}>{loading ? "Signing in…" : "Sign in"}</button>
+          <button className="button button--muted" type="button" onClick={() => navigate("/")}>Cancel</button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
 export function AdminLayout() {
   const { isAdmin } = useApp();
-  if (!isAdmin) return <AdminDenied />;
+  if (!isAdmin) return <Navigate to="/admin/login" replace />;
   return (
     <section className="admin-shell">
       <aside className="admin-sidebar">

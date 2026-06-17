@@ -2,10 +2,11 @@ import { Router } from "express";
 import { prisma } from "@theorie-direkt/database";
 import { serializeQuestion } from "../services/questions.js";
 import { getRequestLanguageCode } from "../services/request-context.js";
+import { requireActiveAccess } from "../middleware/access.js";
 
 export const progressRouter = Router();
 
-progressRouter.get("/mistakes", async (req, res) => {
+progressRouter.get("/mistakes", requireActiveAccess, async (req, res) => {
   const languageCode = await getRequestLanguageCode(req.userId!);
   const latest = await prisma.userMistake.findMany({
     where: { userId: req.userId!, resolvedAt: null },
@@ -15,7 +16,7 @@ progressRouter.get("/mistakes", async (req, res) => {
   res.json(await Promise.all(latest.map((mistake) => serializeQuestion(mistake.questionId, req.userId!, languageCode))));
 });
 
-progressRouter.get("/bookmarks", async (req, res) => {
+progressRouter.get("/bookmarks", requireActiveAccess, async (req, res) => {
   const bookmarks = await prisma.savedQuestion.findMany({
     where: { userId: req.userId! },
     orderBy: { createdAt: "desc" },
@@ -333,7 +334,7 @@ progressRouter.get("/me/statistics", async (req, res) => {
   res.json((await buildProfile(req.userId!)).statistics);
 });
 
-progressRouter.get("/me/mistakes", async (req, res) => {
+progressRouter.get("/me/mistakes", requireActiveAccess, async (req, res) => {
   const languageCode = await getRequestLanguageCode(req.userId!);
   const mistakes = await prisma.userMistake.findMany({
     where: { userId: req.userId!, resolvedAt: null },
@@ -344,7 +345,7 @@ progressRouter.get("/me/mistakes", async (req, res) => {
   );
 });
 
-progressRouter.get("/me/saved", async (req, res) => {
+progressRouter.get("/me/saved", requireActiveAccess, async (req, res) => {
   const languageCode = await getRequestLanguageCode(req.userId!);
   const saved = await prisma.savedQuestion.findMany({
     where: { userId: req.userId! },

@@ -25,7 +25,13 @@ export function ExamPage() {
           return;
         }
         setAccess(true);
-      }).catch(() => navigate("/pricing", { replace: true }));
+      }).catch((error: unknown) => {
+        if (error instanceof ApiError && error.code === "payment_required") {
+          navigate("/pricing", { replace: true });
+          return;
+        }
+        navigate("/pricing", { replace: true });
+      });
     }
   }, [access, category, navigate]);
 
@@ -39,6 +45,10 @@ export function ExamPage() {
     } catch (error) {
       if (error instanceof ApiError && error.code === "NO_QUESTIONS") {
         setPageError(t("exam.noQuestions") || `No exam questions are available for category ${category}.`);
+        return;
+      }
+      if (error instanceof ApiError && error.code === "payment_required") {
+        navigate("/pricing", { replace: true });
         return;
       }
       setPageError(error instanceof Error ? error.message : "Failed to start the exam.");
@@ -83,12 +93,20 @@ export function ExamPage() {
       progressLabel={t("exam.progress", { current: exam.index + 1, total: exam.total })}
       submitLabel={exam.index + 1 === exam.total ? t("exam.finish") : t("exam.continue")}
       onSubmit={async (optionIds) => {
-        const response = await api.answerExam(exam.id, question.id, optionIds);
-        if (response.nextQuestion) {
-          setQuestion(response.nextQuestion);
-          setExam({ ...exam, index: exam.index + 1 });
-        } else {
-          setResult(await api.finishExam(exam.id));
+        try {
+          const response = await api.answerExam(exam.id, question.id, optionIds);
+          if (response.nextQuestion) {
+            setQuestion(response.nextQuestion);
+            setExam({ ...exam, index: exam.index + 1 });
+          } else {
+            setResult(await api.finishExam(exam.id));
+          }
+        } catch (error) {
+          if (error instanceof ApiError && error.code === "payment_required") {
+            navigate("/pricing", { replace: true });
+            return;
+          }
+          throw error;
         }
       }}
     />

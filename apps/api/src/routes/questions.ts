@@ -15,8 +15,11 @@ import {
   getRequestCategoryCode,
   getRequestLanguageCode,
 } from "../services/request-context.js";
+import { requireActiveAccess } from "../middleware/access.js";
 
 export const questionRouter = Router();
+
+questionRouter.use(requireActiveAccess);
 
 questionRouter.get("/next", async (req, res) => {
   const category = String(req.query.category ?? (await getRequestCategoryCode(req.userId!)));

@@ -43,6 +43,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const webApp = window.Telegram?.WebApp;
     webApp?.ready();
     webApp?.expand();
+
+    if (window.location.pathname.startsWith("/admin")) {
+      api.adminMe()
+        .then((admin) => {
+          setIsAdmin(true);
+          setFirstName(admin.username);
+        })
+        .catch(() => {
+          setIsAdmin(false);
+        })
+        .finally(() => setReady(true));
+      return;
+    }
+
     authenticate(webApp?.initData ?? "")
       .then((user) => {
         setFirstName(user.firstName ?? "Driver");

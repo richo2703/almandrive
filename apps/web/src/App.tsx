@@ -15,6 +15,7 @@ import { PricingPage } from "./pages/PricingPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import {
   AdminLayout,
+  AdminLoginPage,
   AdminBannersPage,
   AdminDashboardPage,
   AdminNewsPage,
@@ -29,7 +30,9 @@ import {
 function TitleSync() {
   const location = useLocation();
   useEffect(() => {
-    if (location.pathname.startsWith("/admin")) {
+    if (location.pathname === "/admin/login") {
+      document.title = "Alman Drive Admin · Login";
+    } else if (location.pathname.startsWith("/admin")) {
       const section = location.pathname.split("/").filter(Boolean)[1];
       const suffix = section ? ` · ${section.charAt(0).toUpperCase()}${section.slice(1)}` : "";
       document.title = `Alman Drive Admin${suffix}`;

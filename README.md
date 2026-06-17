@@ -52,6 +52,24 @@ The services use:
 
 For local admin access without Telegram, set `DEV_ADMIN_TELEGRAM_ID` to the same numeric Telegram ID you want treated as an admin, and keep `DEV_AUTH_ENABLED=true`.
 
+### Admin login
+
+The production admin panel uses a username/password session in addition to Telegram-ID-based checks.
+
+Required environment variables:
+
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD_HASH`
+- `ADMIN_SESSION_SECRET`
+
+Generate a password hash locally:
+
+```bash
+npm run admin:hash -- "your-strong-password"
+```
+
+Then place the hash into `ADMIN_PASSWORD_HASH` and open `/admin/login` in the app.
+
 ## Telegram setup
 
 1. Create a bot with BotFather.
@@ -63,6 +81,8 @@ For local admin access without Telegram, set `DEV_ADMIN_TELEGRAM_ID` to the same
 7. Run the API, web app, and bot.
 
 The API validates Telegram `initData` with the documented HMAC procedure and rejects expired data. It then returns a signed, seven-day application session token.
+
+If `initData` is missing outside a safe dev-only configuration, the API returns a controlled `telegram_init_data_required` response and the UI shows a friendly message instead of failing with a 502.
 
 ## Database
 

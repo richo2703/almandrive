@@ -1,8 +1,8 @@
-import { ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
+import { ArrowRight, RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { ApiQuestion } from "@theorie-direkt/shared";
-import { api } from "../lib/api";
+import { ApiError, api } from "../lib/api";
 import { useApp } from "../context/AppContext";
 
 function QuestionRow({
@@ -41,18 +41,25 @@ function CollectionPage({ kind }: { kind: "mistakes" | "bookmarks" }) {
     setBusy(true);
     (mistakes ? api.meMistakes() : api.meSaved())
       .then(setQuestions)
+      .catch(() => setQuestions([]))
       .finally(() => setBusy(false));
   }, [mistakes]);
 
   async function practice() {
     if (!questions.length) return;
-    const session = await api.startQuizSession({
-      category: questions[0]!.category.code,
-      mode: mistakes ? "MISTAKES" : "SAVED",
-      questionIds: questions.map((question) => question.id),
-      questionCount: questions.length,
-    });
-    navigate(`/question/${session.question.id}`, { state: { sessionId: session.id } });
+    try {
+      const session = await api.startQuizSession({
+        category: questions[0]!.category.code,
+        mode: mistakes ? "MISTAKES" : "SAVED",
+        questionIds: questions.map((question) => question.id),
+        questionCount: questions.length,
+      });
+      navigate(`/question/${session.question.id}`, { state: { sessionId: session.id } });
+    } catch (error) {
+      if (error instanceof ApiError && error.code === "payment_required") {
+        navigate("/pricing", { replace: true });
+      }
+    }
   }
 
   async function handleAction(question: ApiQuestion) {

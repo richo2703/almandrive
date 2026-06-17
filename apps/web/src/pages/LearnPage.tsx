@@ -24,7 +24,13 @@ export function LearnPage() {
           return;
         }
         setAccess(true);
-      }).catch(() => navigate("/pricing", { replace: true }));
+      }).catch((error: unknown) => {
+        if (error instanceof ApiError && error.code === "payment_required") {
+          navigate("/pricing", { replace: true });
+          return;
+        }
+        navigate("/pricing", { replace: true });
+      });
       return;
     }
     if (mode !== "topic" || topics.length) return;
@@ -47,6 +53,10 @@ export function LearnPage() {
         } else {
           setPageError(t("learn.noQuestions"));
         }
+        return;
+      }
+      if (error instanceof ApiError && error.code === "payment_required") {
+        navigate("/pricing", { replace: true });
         return;
       }
       setPageError(error instanceof Error ? error.message : "Failed to start learning.");

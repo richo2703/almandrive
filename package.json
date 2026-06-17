@@ -32,6 +32,7 @@
     "translations:merge-uz": "node --import tsx packages/database/src/translations-merge-uz.ts",
     "db:inspect": "node packages/database/scripts/db-inspect.mjs",
     "db:repair-questions": "node packages/database/scripts/db-repair-questions.mjs",
+    "admin:hash": "node scripts/admin-hash.mjs",
     "prisma:generate": "prisma generate --config packages/database/prisma.config.ts",
     "prisma:migrate": "prisma migrate dev --config packages/database/prisma.config.ts",
     "prisma:studio": "prisma studio --config packages/database/prisma.config.ts",
