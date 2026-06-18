@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Navigate, NavLink, Outlet, useNavigate, useSearchParams } from "react-router-dom";
 import { useApp } from "../context/AppContext";
-import { api, type Banner, type BannerInput, type NewsInput, type NewsItem, type PaymentOrder, type Product, type ProductInput, type PromoCode, type PromoCodeInput, type Promotion, type PromotionInput, type UserDetail, type UserRecord } from "../lib/api";
+import { ApiError, api, type AdminUsersResponse, type Banner, type BannerInput, type Category, type CreateUserInput, type Language, type NewsInput, type NewsItem, type PaymentOrder, type Product, type ProductInput, type PromoCode, type PromoCodeInput, type Promotion, type PromotionInput, type UserDetail } from "../lib/api";
 
 function toLocalDateTime(value: string | null) {
   return value ? value.slice(0, 16) : "";
@@ -14,6 +14,39 @@ function fromLocalDateTime(value: string) {
 function jsonish(value: unknown) {
   return JSON.stringify(value, null, 2);
 }
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "";
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+}
+
+type UserCreateDraft = {
+  telegramId: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  languageCode: string;
+  categoryCode: string;
+  adminNote: string;
+  grantAccessEnabled: boolean;
+  grantAccessMode: "days" | "lifetime";
+  accessDays: number;
+  reason: string;
+};
+
+const emptyUserCreateDraft: UserCreateDraft = {
+  telegramId: "",
+  username: "",
+  firstName: "",
+  lastName: "",
+  languageCode: "en",
+  categoryCode: "B",
+  adminNote: "",
+  grantAccessEnabled: false,
+  grantAccessMode: "days",
+  accessDays: 30,
+  reason: "",
+};
 
 function AdminDenied() {
   const { t, isAdmin } = useApp();
@@ -312,58 +345,384 @@ export function AdminPromoCodesPage() {
 
 export function AdminUsersPage() {
   const { isAdmin } = useApp();
-  const [query, setQuery] = useState("");
-  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [users, setUsers] = useState<AdminUsersResponse | null>(null);
   const [selected, setSelected] = useState<UserDetail | null>(null);
-  const [grant, setGrant] = useState({ accessDays: 7, isLifetime: false, reason: "", internalNote: "", productId: "" });
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
+  const [loadingList, setLoadingList] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createDraft, setCreateDraft] = useState<UserCreateDraft>(emptyUserCreateDraft);
+  const [grant, setGrant] = useState({ accessDays: 30, isLifetime: false, reason: "", internalNote: "", productId: "" });
   const [adminNote, setAdminNote] = useState("");
-  useEffect(() => { if (isAdmin) api.adminUsers().then(setUsers); }, [isAdmin]);
+
+  const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
+  const includeDeleted = searchParams.get("includeDeleted") === "true";
+  const query = searchParams.get("q") ?? "";
+
+  useEffect(() => {
+    setSearchInput(query);
+  }, [query]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    Promise.all([api.adminMetaLanguages(), api.adminMetaCategories()])
+      .then(([languageRows, categoryRows]) => {
+        setLanguages(languageRows);
+        setCategories(categoryRows);
+      })
+      .catch(() => {
+        setLanguages([]);
+        setCategories([]);
+      });
+  }, [isAdmin]);
+
+  async function loadUsers(nextPage = page) {
+    setLoadingList(true);
+    try {
+      const response = await api.adminUsers({
+        q: query || undefined,
+        page: nextPage,
+        limit: 50,
+        includeDeleted,
+      });
+      setUsers(response);
+      return response;
+    } finally {
+      setLoadingList(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    void loadUsers();
+  }, [isAdmin, query, page, includeDeleted]);
+
   if (!isAdmin) return <AdminDenied />;
-  async function search() { setUsers(await api.adminUsers(query)); }
+
   async function loadUser(id: string) {
     const user = await api.adminUser(id);
     setSelected(user);
     setAdminNote(user.adminNote ?? "");
+    return user;
   }
+
+  async function submitCreate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const payload: CreateUserInput = {
+      telegramId: createDraft.telegramId,
+      username: createDraft.username.trim() || null,
+      firstName: createDraft.firstName.trim() || null,
+      lastName: createDraft.lastName.trim() || null,
+      languageCode: createDraft.languageCode,
+      categoryCode: createDraft.categoryCode,
+      adminNote: createDraft.adminNote.trim() || null,
+      grantAccess: createDraft.grantAccessEnabled
+        ? {
+            accessDays: createDraft.grantAccessMode === "days" ? createDraft.accessDays : null,
+            isLifetime: createDraft.grantAccessMode === "lifetime",
+            reason: createDraft.reason.trim() || null,
+          }
+        : null,
+    };
+    try {
+      const created = await api.adminCreateUser(payload);
+      setSelected(created);
+      setAdminNote(created.adminNote ?? "");
+      setCreateDraft(emptyUserCreateDraft);
+      setCreateOpen(false);
+      await loadUsers(1);
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 409) {
+          const data = error.data as { existingUserId?: string; isDeleted?: boolean } | undefined;
+          const duplicateId = payload.telegramId;
+          if (data?.isDeleted && data.existingUserId) {
+            const shouldRestore = window.confirm(`User with Telegram ID ${duplicateId} already exists. They are soft-deleted, would you like to restore them?`);
+            if (shouldRestore) {
+              const restored = await api.adminRestoreUser(data.existingUserId);
+              await loadUsers(1);
+              await loadUser(restored.user.id);
+            }
+          } else {
+            alert(`User with Telegram ID ${duplicateId} already exists.`);
+          }
+          return;
+        }
+        alert(error.message);
+        return;
+      }
+      alert(error instanceof Error ? error.message : "Failed to create user.");
+    }
+  }
+
+  async function refreshSelected(userId: string) {
+    const user = await loadUser(userId);
+    setSelected(user);
+    return user;
+  }
+
+  async function handleToggleDelete() {
+    if (!selected) return;
+    if (!selected.deletedAt) {
+      if (!window.confirm("Delete this user? They will be hidden but order history is preserved. You can restore them later.")) return;
+      await api.adminDeleteUser(selected.id);
+      await refreshSelected(selected.id);
+      await loadUsers();
+      return;
+    }
+    if (!window.confirm("Restore this user? Previous accesses will NOT be restored automatically.")) return;
+    await api.adminRestoreUser(selected.id);
+    await refreshSelected(selected.id);
+    await loadUsers();
+  }
+
+  async function handleHardDelete() {
+    if (!selected) return;
+    if (!window.confirm("PERMANENTLY delete this user? This cannot be undone.")) return;
+    const phrase = window.prompt("Type PERMANENTLY_DELETE to confirm:");
+    if (phrase !== "PERMANENTLY_DELETE") return;
+    try {
+      await api.adminDeleteUserPermanent(selected.id);
+      setSelected(null);
+      await loadUsers();
+    } catch (error) {
+      if (error instanceof Error && (error as { status?: number }).status === 409) {
+        alert("Cannot permanently delete: user has paid orders. Use soft delete only.");
+        return;
+      }
+      alert(error instanceof Error ? error.message : "Failed to permanently delete user.");
+    }
+  }
+
+  async function handleGrantAccess() {
+    if (!selected) return;
+    await api.adminGrantAccess(selected.id, grant);
+    await refreshSelected(selected.id);
+  }
+
+  async function handleBlockToggle() {
+    if (!selected) return;
+    await api.adminBlockUser(selected.id, !selected.isBlocked, adminNote);
+    await refreshSelected(selected.id);
+  }
+
+  async function handleSaveNote() {
+    if (!selected) return;
+    await api.adminBlockUser(selected.id, selected.isBlocked, adminNote);
+    await refreshSelected(selected.id);
+  }
+
+  const totalPages = users?.totalPages ?? 1;
+  const total = users?.total ?? 0;
+
+  function updateSearchParams(next: { q?: string; page?: number; includeDeleted?: boolean }) {
+    const params = new URLSearchParams(searchParams);
+    if (next.q !== undefined) {
+      if (next.q) params.set("q", next.q);
+      else params.delete("q");
+    }
+    if (next.page !== undefined) params.set("page", String(next.page));
+    if (next.includeDeleted !== undefined) {
+      if (next.includeDeleted) params.set("includeDeleted", "true");
+      else params.delete("includeDeleted");
+    }
+    setSearchParams(params);
+  }
+
   return (
     <section className="admin-page">
-      <h2>Users</h2>
-      <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by Telegram ID, username, first or last name" />
-        <button className="button button--primary" onClick={search}>Search</button>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+        <h2>Users</h2>
+        <button className="button button--primary" type="button" onClick={() => setCreateOpen((value) => !value)}>
+          Add user
+        </button>
       </div>
-      <div className="row-list">
-        {users.map((user) => (
-          <button className="question-row" key={user.id} onClick={() => void loadUser(user.id)} type="button">
-            <div>
-              <span className="tag">{user.telegramId}</span>
-              <strong>{user.firstName ?? user.username ?? "Unknown"}</strong>
-              <small>{user.username ?? "no username"}</small>
+
+      {createOpen && (
+        <form className="card" onSubmit={submitCreate} style={{ marginBottom: 16, gap: 12, display: "grid" }}>
+          <h3>Add user</h3>
+          <div className="card-grid">
+            <label style={{ display: "grid", gap: 6 }}>
+              <span>Telegram ID</span>
+              <input type="number" value={createDraft.telegramId} onChange={(e) => setCreateDraft({ ...createDraft, telegramId: e.target.value })} required />
+            </label>
+            <label style={{ display: "grid", gap: 6 }}>
+              <span>Username</span>
+              <input value={createDraft.username} onChange={(e) => setCreateDraft({ ...createDraft, username: e.target.value })} placeholder="without @" />
+            </label>
+            <label style={{ display: "grid", gap: 6 }}>
+              <span>First name</span>
+              <input value={createDraft.firstName} onChange={(e) => setCreateDraft({ ...createDraft, firstName: e.target.value })} />
+            </label>
+            <label style={{ display: "grid", gap: 6 }}>
+              <span>Last name</span>
+              <input value={createDraft.lastName} onChange={(e) => setCreateDraft({ ...createDraft, lastName: e.target.value })} />
+            </label>
+            <label style={{ display: "grid", gap: 6 }}>
+              <span>Language</span>
+              <select value={createDraft.languageCode} onChange={(e) => setCreateDraft({ ...createDraft, languageCode: e.target.value })}>
+                {languages.map((language) => (
+                  <option key={language.code} value={language.code}>{language.code} · {language.name}</option>
+                ))}
+              </select>
+            </label>
+            <label style={{ display: "grid", gap: 6 }}>
+              <span>Category</span>
+              <select value={createDraft.categoryCode} onChange={(e) => setCreateDraft({ ...createDraft, categoryCode: e.target.value })}>
+                {categories.map((category) => (
+                  <option key={category.code} value={category.code}>{category.code} · {category.name}</option>
+                ))}
+              </select>
+            </label>
+            <label style={{ display: "grid", gap: 6, gridColumn: "1 / -1" }}>
+              <span>Admin note</span>
+              <textarea value={createDraft.adminNote} onChange={(e) => setCreateDraft({ ...createDraft, adminNote: e.target.value })} />
+            </label>
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <input type="checkbox" checked={createDraft.grantAccessEnabled} onChange={(e) => setCreateDraft({ ...createDraft, grantAccessEnabled: e.target.checked })} />
+            Grant access immediately
+          </label>
+          {createDraft.grantAccessEnabled && (
+            <div className="card-grid">
+              <div style={{ display: "grid", gap: 8 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="radio"
+                    checked={createDraft.grantAccessMode === "days"}
+                    onChange={() => setCreateDraft({ ...createDraft, grantAccessMode: "days" })}
+                  />
+                  By days
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <input
+                    type="radio"
+                    checked={createDraft.grantAccessMode === "lifetime"}
+                    onChange={() => setCreateDraft({ ...createDraft, grantAccessMode: "lifetime" })}
+                  />
+                  Lifetime
+                </label>
+              </div>
+              {createDraft.grantAccessMode === "days" ? (
+                <label style={{ display: "grid", gap: 6 }}>
+                  <span>Access days</span>
+                  <input type="number" min={1} value={createDraft.accessDays} onChange={(e) => setCreateDraft({ ...createDraft, accessDays: Number(e.target.value) })} />
+                </label>
+              ) : null}
+              <label style={{ display: "grid", gap: 6, gridColumn: "1 / -1" }}>
+                <span>Reason</span>
+                <input value={createDraft.reason} onChange={(e) => setCreateDraft({ ...createDraft, reason: e.target.value })} />
+              </label>
             </div>
-          </button>
-        ))}
+          )}
+          <div style={{ display: "flex", gap: 10 }}>
+            <button className="button button--primary" type="submit">Create</button>
+            <button className="button button--muted" type="button" onClick={() => { setCreateOpen(false); setCreateDraft(emptyUserCreateDraft); }}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap" }}>
+        <input
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Search by Telegram ID, username, first or last name"
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              updateSearchParams({ q: searchInput, page: 1 });
+            }
+          }}
+        />
+        <button className="button button--primary" type="button" onClick={() => updateSearchParams({ q: searchInput, page: 1 })}>
+          Search
+        </button>
+        <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <input
+            type="checkbox"
+            checked={includeDeleted}
+            onChange={(e) => updateSearchParams({ includeDeleted: e.target.checked, page: 1 })}
+          />
+          Show deleted
+        </label>
       </div>
+
+      <div className="row-list">
+        {loadingList ? (
+          <div className="loading">Loading users…</div>
+        ) : (
+          users?.items.map((user) => (
+            <button
+              className="question-row"
+              key={user.id}
+              onClick={() => void loadUser(user.id)}
+              type="button"
+              style={{ opacity: user.deletedAt ? 0.5 : 1 }}
+            >
+              <div>
+                <span className="tag">{user.deletedAt ? "Deleted" : user.telegramId}</span>
+                <strong>{user.firstName ?? user.username ?? "Unknown"}</strong>
+                <small>{user.username ?? "no username"}</small>
+                {user.deletedAt ? <small>Deleted</small> : null}
+              </div>
+            </button>
+          ))
+        )}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 12, flexWrap: "wrap" }}>
+        <button
+          className="button button--muted"
+          type="button"
+          onClick={() => updateSearchParams({ page: Math.max(1, page - 1) })}
+          disabled={page <= 1}
+        >
+          ← Prev
+        </button>
+        <span>{`Page ${page} of ${totalPages} · ${total} users`}</span>
+        <button
+          className="button button--muted"
+          type="button"
+          onClick={() => updateSearchParams({ page: Math.min(totalPages, page + 1) })}
+          disabled={page >= totalPages}
+        >
+          Next →
+        </button>
+      </div>
+
       {selected && (
-        <section className="menu-list">
+        <section className="menu-list" style={{ marginTop: 20 }}>
           <div className="question-row">
             <div>
               <span className="tag">Selected user</span>
               <strong>{selected.firstName ?? selected.username ?? selected.telegramId}</strong>
               <small>{selected.isBlocked ? "Blocked" : "Active"}</small>
               <small>{selected.adminNote ?? "No note"}</small>
+              {selected.deletedAt ? <small>{`Deleted on ${formatDateTime(selected.deletedAt)}`}</small> : null}
             </div>
-            <button className="button button--muted" onClick={async () => { await api.adminBlockUser(selected.id, !selected.isBlocked, adminNote); setSelected(await api.adminUser(selected.id)); }}>Toggle block</button>
+            <div style={{ display: "grid", gap: 8 }}>
+              <button className="button button--muted" type="button" onClick={handleBlockToggle}>
+                Toggle block
+              </button>
+              <button className="button button--muted" type="button" onClick={handleSaveNote}>
+                Save note
+              </button>
+            </div>
           </div>
+
           <div style={{ display: "grid", gap: 8, padding: "12px 0" }}>
             <input type="number" value={grant.accessDays} onChange={(e) => setGrant({ ...grant, accessDays: Number(e.target.value) })} placeholder="accessDays" />
             <label><input type="checkbox" checked={grant.isLifetime} onChange={(e) => setGrant({ ...grant, isLifetime: e.target.checked })} /> Lifetime</label>
             <input value={grant.reason} onChange={(e) => setGrant({ ...grant, reason: e.target.value })} placeholder="Reason" />
             <input value={grant.internalNote} onChange={(e) => setGrant({ ...grant, internalNote: e.target.value })} placeholder="Internal note" />
             <input value={grant.productId} onChange={(e) => setGrant({ ...grant, productId: e.target.value })} placeholder="Product ID (optional)" />
-            <button className="button button--primary" onClick={async () => { await api.adminGrantAccess(selected.id, grant); setSelected(await api.adminUser(selected.id)); }}>Grant access</button>
-            <input value={adminNote} onChange={(e) => setAdminNote(e.target.value)} placeholder="Admin note" />
-            <button className="button button--muted" onClick={async () => { await api.adminBlockUser(selected.id, selected.isBlocked, adminNote); setSelected(await api.adminUser(selected.id)); }}>Save note</button>
+            <button className="button button--primary" onClick={handleGrantAccess}>Grant access</button>
           </div>
+
           <div className="row-list">
             <div className="question-row">
               <div>
@@ -387,10 +746,40 @@ export function AdminUsersPage() {
                   <span className="tag">{access.source}</span>
                   <strong>{access.isLifetime ? "Lifetime" : access.expiresAt ? new Date(access.expiresAt).toLocaleDateString() : "No expiry"}</strong>
                 </div>
-                <button className="button button--muted" onClick={async () => { await api.adminRevokeAccess(selected.id, { accessId: access.id }); setSelected(await api.adminUser(selected.id)); }}>Revoke</button>
+                <button className="button button--muted" onClick={async () => { await api.adminRevokeAccess(selected.id, { accessId: access.id }); await refreshSelected(selected.id); }}>Revoke</button>
               </div>
             ))}
           </div>
+
+          <section
+            style={{
+              marginTop: 16,
+              paddingTop: 16,
+              borderTop: "1px solid rgba(148, 163, 184, 0.25)",
+              background: selected.deletedAt ? "rgba(220, 38, 38, 0.05)" : "transparent",
+            }}
+          >
+            <h3>Danger zone</h3>
+            {!selected.deletedAt ? (
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <button className="button button--muted" type="button" style={{ borderColor: "rgba(239, 68, 68, 0.35)", color: "#b91c1c" }} onClick={handleToggleDelete}>
+                  Delete user
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gap: 10 }}>
+                <span className="tag">{`Deleted on ${formatDateTime(selected.deletedAt)}`}</span>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button className="button button--muted" type="button" onClick={handleToggleDelete}>
+                    Restore
+                  </button>
+                  <button className="button button--muted" type="button" style={{ borderColor: "rgba(220, 38, 38, 0.55)", color: "#b91c1c" }} onClick={handleHardDelete}>
+                    Permanently delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
         </section>
       )}
     </section>

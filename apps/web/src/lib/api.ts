@@ -8,12 +8,14 @@ let authToken = localStorage.getItem("theorie-token");
 export class ApiError extends Error {
   status: number;
   code?: string;
+  data?: unknown;
 
-  constructor(message: string, status: number, code?: string) {
+  constructor(message: string, status: number, code?: string, data?: unknown) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
+    this.data = data;
   }
 }
 
@@ -28,7 +30,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     },
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new ApiError(body.message ?? body.error ?? `Request failed (${response.status})`, response.status, body.code);
+  if (!response.ok) throw new ApiError(body.message ?? body.error ?? `Request failed (${response.status})`, response.status, body.code, body);
   return body as T;
 }
 
@@ -155,8 +157,28 @@ export const api = {
     request<PromoCode>(`/api/admin/promo-codes/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
   adminDeletePromoCode: (id: string) =>
     request<{ deactivated: boolean }>(`/api/admin/promo-codes/${id}`, { method: "DELETE" }),
-  adminUsers: (q = "") => request<UserRecord[]>(`/api/admin/users${q ? `?q=${encodeURIComponent(q)}` : ""}`),
+  adminUsers: (params: { q?: string; page?: number; limit?: number; includeDeleted?: boolean } = {}) => {
+    const search = new URLSearchParams();
+    if (params.q) search.set("q", params.q);
+    if (params.page) search.set("page", String(params.page));
+    if (params.limit) search.set("limit", String(params.limit));
+    if (params.includeDeleted) search.set("includeDeleted", "true");
+    return request<AdminUsersResponse>(`/api/admin/users${search.toString() ? `?${search.toString()}` : ""}`);
+  },
   adminUser: (id: string) => request<UserDetail>(`/api/admin/users/${id}`),
+  adminCreateUser: (payload: CreateUserInput) =>
+    request<UserDetail>("/api/admin/users", { method: "POST", body: JSON.stringify(payload) }),
+  adminDeleteUser: (id: string) =>
+    request<{ ok: boolean; softDeleted: boolean; user: UserRecord }>(`/api/admin/users/${id}`, { method: "DELETE" }),
+  adminRestoreUser: (id: string) =>
+    request<{ ok: boolean; restored: boolean; user: UserRecord }>(`/api/admin/users/${id}/restore`, { method: "POST" }),
+  adminDeleteUserPermanent: (id: string) =>
+    request<{ ok: boolean; permanentlyDeleted: boolean }>(`/api/admin/users/${id}/permanent`, {
+      method: "DELETE",
+      body: JSON.stringify({ confirm: "PERMANENTLY_DELETE" }),
+    }),
+  adminMetaLanguages: () => request<Language[]>("/api/admin/meta/languages"),
+  adminMetaCategories: () => request<Category[]>("/api/admin/meta/categories"),
   adminGrantAccess: (id: string, payload: GrantAccessInput) =>
     request<UserAccess>(`/api/admin/users/${id}/grant-access`, { method: "POST", body: JSON.stringify(payload) }),
   adminRevokeAccess: (id: string, payload: { accessId?: string }) =>
@@ -369,6 +391,7 @@ export interface UserRecord {
   isBlocked: boolean;
   isAdmin: boolean;
   adminNote: string | null;
+  deletedAt: string | null;
   selectedCategoryId: string | null;
   interfaceLanguageId: string | null;
   createdAt: string;
@@ -563,6 +586,29 @@ export interface CreateInvoiceResult {
 export interface AdminAuthResult {
   ok: boolean;
   username: string;
+}
+
+export interface AdminUsersResponse {
+  items: UserRecord[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CreateUserInput {
+  telegramId: number | string;
+  username?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  languageCode?: string;
+  categoryCode?: string;
+  adminNote?: string | null;
+  grantAccess?: {
+    accessDays?: number | null;
+    isLifetime: boolean;
+    reason?: string | null;
+  } | null;
 }
 
 export interface AdminDashboard {

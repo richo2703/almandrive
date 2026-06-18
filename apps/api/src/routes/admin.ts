@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { prisma } from "@theorie-direkt/database";
+import { Prisma, prisma } from "@theorie-direkt/database";
 import { z } from "zod";
 import { requireAdmin, resolveAdminIdentity } from "../middleware/admin-session.js";
 import { env } from "../config/env.js";
+import { adminLoginRateLimit } from "../middleware/rate-limit.js";
 import { createAdminSessionToken, clearAdminSessionCookie, setAdminSessionCookie, verifyAdminPassword } from "../utils/admin-session.js";
 
 export const adminRouter = Router();
@@ -40,6 +41,32 @@ const userGrantSchema = z.object({
   reason: z.string().optional().nullable(),
   internalNote: z.string().optional().nullable(),
   productId: z.string().cuid().optional().nullable(),
+});
+
+const userCreateSchema = z.object({
+  telegramId: z.coerce.bigint(),
+  username: z.string().trim().min(1).optional().nullable(),
+  firstName: z.string().trim().min(1).optional().nullable(),
+  lastName: z.string().trim().min(1).optional().nullable(),
+  languageCode: z.string().default("en"),
+  categoryCode: z.string().default("B"),
+  adminNote: z.string().optional().nullable(),
+  grantAccess: z.object({
+    accessDays: z.coerce.number().int().min(1).optional().nullable(),
+    isLifetime: z.boolean().default(false),
+    reason: z.string().optional().nullable(),
+  }).optional().nullable(),
+});
+
+const usersQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+  q: z.string().trim().default(""),
+  includeDeleted: z.coerce.boolean().default(false),
+});
+
+const hardDeleteSchema = z.object({
+  confirm: z.literal("PERMANENTLY_DELETE"),
 });
 
 const userBlockSchema = z.object({
@@ -93,11 +120,13 @@ function parseDate(value?: string | null) {
 
 function serializeUser(user: {
   telegramId: bigint;
+  deletedAt?: Date | null;
   [key: string]: unknown;
 }) {
   return {
     ...user,
     telegramId: user.telegramId.toString(),
+    deletedAt: user.deletedAt ? user.deletedAt.toISOString() : null,
   };
 }
 
@@ -118,7 +147,36 @@ function serializePromoCode(promoCode: any) {
   };
 }
 
-adminRouter.post("/login", async (req, res) => {
+function buildUserWhere(q: string, includeDeleted: boolean): Prisma.UserWhereInput {
+  return {
+    ...(includeDeleted ? {} : { deletedAt: null }),
+    ...(q
+      ? {
+          OR: [
+            ...( /^\d+$/.test(q) ? [{ telegramId: BigInt(q) }] : [] ),
+            { username: { contains: q, mode: "insensitive" } },
+            { firstName: { contains: q, mode: "insensitive" } },
+            { lastName: { contains: q, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+}
+
+async function loadUserRelations(userId: string) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      paymentOrders: { orderBy: { createdAt: "desc" }, include: { product: true, promoCode: true } },
+      userAccesses: { orderBy: { createdAt: "desc" }, include: { product: true, promoCode: true } },
+      promoCodeUsages: { orderBy: { usedAt: "desc" }, include: { promoCode: true } },
+      interfaceLanguage: true,
+      selectedCategory: true,
+    },
+  });
+}
+
+adminRouter.post("/login", adminLoginRateLimit, async (req, res) => {
   const body = z.object({ username: z.string().min(1), password: z.string().min(1) }).safeParse(req.body);
   if (!body.success) {
     res.status(400).json({ error: "Validation failed." });
@@ -193,6 +251,14 @@ adminRouter.get("/dashboard", async (_req, res) => {
   });
 });
 
+adminRouter.get("/meta/languages", async (_req, res) => {
+  res.json(await prisma.language.findMany({ orderBy: { code: "asc" } }));
+});
+
+adminRouter.get("/meta/categories", async (_req, res) => {
+  res.json(await prisma.licenseCategory.findMany({ orderBy: { code: "asc" } }));
+});
+
 adminRouter.get("/products", async (_req, res) => {
   res.json(await prisma.product.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }] }));
 });
@@ -251,34 +317,90 @@ adminRouter.delete("/promo-codes/:id", async (req, res) => {
 });
 
 adminRouter.get("/users", async (req, res) => {
-  const q = String(req.query.q ?? "").trim();
-  const users = await prisma.user.findMany({
-    where: q
-      ? {
-          OR: [
-            ...( /^\d+$/.test(q) ? [{ telegramId: BigInt(q) }] : [] ),
-            { username: { contains: q, mode: "insensitive" } },
-            { firstName: { contains: q, mode: "insensitive" } },
-            { lastName: { contains: q, mode: "insensitive" } },
-          ],
-        }
-      : undefined,
-    orderBy: { lastSeenAt: "desc" },
-    take: 100,
+  const { page, limit, q, includeDeleted } = usersQuerySchema.parse(req.query);
+  const where = buildUserWhere(q, includeDeleted);
+  const [items, total] = await Promise.all([
+    prisma.user.findMany({
+      where,
+      orderBy: { lastSeenAt: "desc" },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.user.count({ where }),
+  ]);
+  res.json({
+    items: items.map(serializeUser),
+    total,
+    page,
+    limit,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
   });
-  res.json(users.map(serializeUser));
+});
+
+adminRouter.post("/users", async (req, res) => {
+  const data = userCreateSchema.parse(req.body);
+  const existing = await prisma.user.findUnique({
+    where: { telegramId: data.telegramId },
+    select: { id: true, deletedAt: true },
+  });
+  if (existing) {
+    res.status(409).json({
+      error: "User with this Telegram ID already exists.",
+      existingUserId: existing.id,
+      isDeleted: Boolean(existing.deletedAt),
+    });
+    return;
+  }
+  const language = await prisma.language.findUnique({ where: { code: data.languageCode } });
+  if (!language) {
+    res.status(400).json({ error: "Unknown language code." });
+    return;
+  }
+  const category = await prisma.licenseCategory.findUnique({ where: { code: data.categoryCode } });
+  if (!category) {
+    res.status(400).json({ error: "Unknown category code." });
+    return;
+  }
+  const now = new Date();
+  const user = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: {
+        telegramId: data.telegramId,
+        username: data.username ?? null,
+        firstName: data.firstName ?? null,
+        lastName: data.lastName ?? null,
+        languageCode: data.languageCode,
+        firstSeenAt: now,
+        lastSeenAt: now,
+        interfaceLanguageId: language.id,
+        selectedCategoryId: category.id,
+        adminNote: data.adminNote ?? null,
+      },
+    });
+    if (data.grantAccess) {
+      const access = await tx.userAccess.create({
+        data: {
+          userId: created.id,
+          source: "MANUAL_ADMIN",
+          startsAt: now,
+          expiresAt: data.grantAccess.isLifetime ? null : new Date(now.getTime() + ((data.grantAccess.accessDays ?? 1) * 24 * 60 * 60 * 1000)),
+          isLifetime: data.grantAccess.isLifetime,
+          isActive: true,
+          internalNote: data.grantAccess.reason ?? null,
+        },
+      });
+      await tx.userAccess.update({
+        where: { id: access.id },
+        data: { internalNote: data.grantAccess.reason ?? null },
+      });
+    }
+    return created;
+  });
+  const createdUser = await loadUserRelations(user.id);
+  res.status(201).json(serializeUser(createdUser ?? user));
 });
 adminRouter.get("/users/:id", async (req, res) => {
-  const user = await prisma.user.findUnique({
-    where: { id: req.params.id },
-    include: {
-      paymentOrders: { orderBy: { createdAt: "desc" }, include: { product: true, promoCode: true } },
-      userAccesses: { orderBy: { createdAt: "desc" }, include: { product: true, promoCode: true } },
-      promoCodeUsages: { orderBy: { usedAt: "desc" }, include: { promoCode: true } },
-      interfaceLanguage: true,
-      selectedCategory: true,
-    },
-  });
+  const user = await loadUserRelations(req.params.id);
   if (!user) {
     res.status(404).json({ error: "User not found." });
     return;
@@ -364,6 +486,91 @@ adminRouter.get("/users/:id", async (req, res) => {
     latestSession,
   });
 });
+adminRouter.delete("/users/:id", async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.params.id },
+    select: { id: true, deletedAt: true },
+  });
+  if (!user) {
+    res.status(404).json({ error: "User not found." });
+    return;
+  }
+  if (user.deletedAt) {
+    res.status(409).json({ error: "Already deleted." });
+    return;
+  }
+  const now = new Date();
+  const updatedUser = await prisma.$transaction(async (tx) => {
+    await tx.userAccess.updateMany({
+      where: { userId: req.params.id, revokedAt: null },
+      data: { isActive: false, revokedAt: now, revokedByAdminId: null },
+    });
+    return tx.user.update({
+      where: { id: req.params.id },
+      data: { deletedAt: now },
+    });
+  });
+  res.json({ ok: true, softDeleted: true, user: serializeUser(updatedUser) });
+});
+adminRouter.post("/users/:id/restore", async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.params.id },
+    select: { id: true, deletedAt: true },
+  });
+  if (!user) {
+    res.status(404).json({ error: "User not found." });
+    return;
+  }
+  if (!user.deletedAt) {
+    res.status(409).json({ error: "User is not deleted." });
+    return;
+  }
+  const updatedUser = await prisma.user.update({
+    where: { id: req.params.id },
+    data: { deletedAt: null },
+  });
+  res.json({ ok: true, restored: true, user: serializeUser(updatedUser) });
+});
+adminRouter.delete("/users/:id/permanent", async (req, res) => {
+  const { confirm } = hardDeleteSchema.parse(req.body);
+  if (confirm !== "PERMANENTLY_DELETE") {
+    res.status(400).json({ error: "Confirmation phrase required." });
+    return;
+  }
+  const user = await prisma.user.findUnique({
+    where: { id: req.params.id },
+    select: { id: true },
+  });
+  if (!user) {
+    res.status(404).json({ error: "User not found." });
+    return;
+  }
+  const paidOrders = await prisma.paymentOrder.count({ where: { userId: req.params.id, status: "PAID" } });
+  if (paidOrders > 0) {
+    res.status(409).json({ error: "Cannot permanently delete user with paid orders. Use soft delete instead." });
+    return;
+  }
+  const quizSessionIds = await prisma.quizSession.findMany({
+    where: { userId: req.params.id },
+    select: { id: true },
+  });
+  await prisma.$transaction([
+    prisma.userMistake.deleteMany({ where: { userId: req.params.id } }),
+    prisma.savedQuestion.deleteMany({ where: { userId: req.params.id } }),
+    prisma.userQuestionProgress.deleteMany({ where: { userId: req.params.id } }),
+    prisma.userTopicProgress.deleteMany({ where: { userId: req.params.id } }),
+    prisma.quizAnswer.deleteMany({ where: { quizSessionId: { in: quizSessionIds.map((session) => session.id) } } }),
+    prisma.quizSession.deleteMany({ where: { userId: req.params.id } }),
+    prisma.promoCodeUsage.deleteMany({ where: { userId: req.params.id } }),
+    prisma.userAccess.deleteMany({ where: { userId: req.params.id } }),
+    prisma.paymentOrder.deleteMany({ where: { userId: req.params.id } }),
+    prisma.payment.deleteMany({ where: { userId: req.params.id } }),
+    prisma.subscription.deleteMany({ where: { userId: req.params.id } }),
+    prisma.user.delete({ where: { id: req.params.id } }),
+  ]);
+  // TODO: restrict hard delete to SUPER_ADMIN role when admin roles are introduced
+  res.json({ ok: true, permanentlyDeleted: true });
+});
 adminRouter.post("/users/:id/grant-access", async (req, res) => {
   const data = userGrantSchema.parse(req.body);
   const access = await prisma.userAccess.create({
@@ -384,7 +591,7 @@ adminRouter.post("/users/:id/revoke-access", async (req, res) => {
   const { accessId } = z.object({ accessId: z.string().cuid().optional() }).parse(req.body);
   const updated = await prisma.userAccess.updateMany({
     where: { userId: req.params.id, ...(accessId ? { id: accessId } : {}), revokedAt: null },
-    data: { isActive: false, revokedAt: new Date(), revokedByAdminId: req.userId! },
+    data: { isActive: false, revokedAt: new Date(), revokedByAdminId: null },
   });
   res.json(updated);
 });
