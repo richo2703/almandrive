@@ -80,6 +80,7 @@ model User {
   isBlocked           Boolean       @default(false)
   isAdmin             Boolean       @default(false)
   adminNote           String?
+  deletedAt           DateTime?
   interfaceLanguageId String?
   selectedCategoryId  String?
   createdAt           DateTime      @default(now())
