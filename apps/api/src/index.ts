@@ -30,13 +30,13 @@ app.use(express.json({ limit: "1mb" }));
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/auth", authRouter);
+app.use("/api/admin", adminRouter);
 app.use("/api", requireAuth, catalogRouter);
 app.use("/api/questions", requireAuth, questionRouter);
 app.use("/api", requireAuth, progressRouter);
 app.use("/api", requireAuth, shopRouter);
 app.use("/api/exam", requireAuth, examRouter);
 app.use("/api/quiz-sessions", requireAuth, examRouter);
-app.use("/api/admin", adminRouter);
 const webDistPath = resolve(process.cwd(), "apps/web/dist");
 if (existsSync(webDistPath)) {
   app.use(express.static(webDistPath));
