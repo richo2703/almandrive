@@ -67,7 +67,11 @@
     "activeBanners": "Aktive Banner",
     "adminIds": "Admin-IDs",
     "recentOrders": "Letzte Bestellungen",
-    "recentUsers": "Letzte Nutzer"
+    "recentUsers": "Letzte Nutzer",
+    "revenueChart": "Umsatz der letzten 30 Tage",
+    "newUsersChart": "Neue Nutzer der letzten 30 Tage",
+    "ordersStatusChart": "Bestellungen nach Status",
+    "topProductsChart": "Top-Produkte"
   },
   "users": {
     "title": "Nutzer",

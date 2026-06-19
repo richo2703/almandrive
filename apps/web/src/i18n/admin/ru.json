@@ -67,7 +67,11 @@
     "activeBanners": "Активные баннеры",
     "adminIds": "Admin ID",
     "recentOrders": "Последние заказы",
-    "recentUsers": "Последние пользователи"
+    "recentUsers": "Последние пользователи",
+    "revenueChart": "Доход за 30 дней",
+    "newUsersChart": "Новые пользователи за 30 дней",
+    "ordersStatusChart": "Заказы по статусам",
+    "topProductsChart": "Топ продуктов"
   },
   "users": {
     "title": "Пользователи",

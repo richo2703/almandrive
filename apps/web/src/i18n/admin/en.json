@@ -67,7 +67,11 @@
     "activeBanners": "Active banners",
     "adminIds": "Admin IDs",
     "recentOrders": "Recent orders",
-    "recentUsers": "Recent users"
+    "recentUsers": "Recent users",
+    "revenueChart": "Revenue, last 30 days",
+    "newUsersChart": "New users, last 30 days",
+    "ordersStatusChart": "Orders by status",
+    "topProductsChart": "Top products"
   },
   "users": {
     "title": "Users",

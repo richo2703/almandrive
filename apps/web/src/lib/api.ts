@@ -141,6 +141,7 @@ export const api = {
   adminLogout: () => request<{ ok: boolean }>("/api/admin/logout", { method: "POST" }),
   adminMe: () => request<AdminAuthResult>("/api/admin/me"),
   adminDashboard: () => request<AdminDashboard>("/api/admin/dashboard"),
+  adminDashboardCharts: (days = 30) => request<AdminDashboardCharts>(`/api/admin/dashboard/charts?days=${days}`),
   adminProducts: () => request<Product[]>("/api/admin/products"),
   adminCreateProduct: (payload: Partial<ProductInput>) =>
     request<Product>("/api/admin/products", { method: "POST", body: JSON.stringify(payload) }),
@@ -640,6 +641,13 @@ export interface AdminDashboard {
   recentOrders: PaymentOrder[];
   recentUsers: UserRecord[];
   adminTelegramIds: string[];
+}
+
+export interface AdminDashboardCharts {
+  revenue: Array<{ date: string; revenueStars: number }>;
+  newUsers: Array<{ date: string; newUsers: number }>;
+  ordersByStatus: Array<{ status: PaymentOrder["status"]; count: number }>;
+  topProducts: Array<{ productId: string; title: string; salesCount: number }>;
 }
 
 export interface UserDetail extends UserRecord {

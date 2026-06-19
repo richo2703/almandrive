@@ -1005,6 +1005,10 @@ p { line-height: 1.55; color: var(--muted); }
   gap: 6px;
 }
 
+.admin-metric svg {
+  color: var(--admin-accent);
+}
+
 .admin-metric span {
   color: var(--admin-text-secondary);
   font-size: 0.8rem;
@@ -1012,6 +1016,25 @@ p { line-height: 1.55; color: var(--muted); }
 
 .admin-metric strong {
   font-size: 1.4rem;
+}
+
+.admin-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-chart-card {
+  min-width: 0;
+  border: 1px solid var(--admin-border);
+  border-radius: 18px;
+  background: var(--admin-bg-secondary);
+  padding: 16px;
+}
+
+.admin-chart-card h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
 }
 
 .admin-list {

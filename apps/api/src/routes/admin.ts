@@ -293,6 +293,67 @@ adminRouter.get("/dashboard", async (_req, res) => {
   });
 });
 
+adminRouter.get("/dashboard/charts", async (req, res) => {
+  const days = Math.min(90, Math.max(1, Number(req.query.days ?? 30) || 30));
+  const since = new Date();
+  since.setHours(0, 0, 0, 0);
+  since.setDate(since.getDate() - (days - 1));
+
+  const [paidOrders, users, ordersByStatus, productSales] = await Promise.all([
+    prisma.paymentOrder.findMany({
+      where: { status: "PAID", createdAt: { gte: since } },
+      select: { createdAt: true, amountStarsFinal: true },
+    }),
+    prisma.user.findMany({
+      where: { createdAt: { gte: since } },
+      select: { createdAt: true },
+    }),
+    prisma.paymentOrder.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    }),
+    prisma.paymentOrder.groupBy({
+      by: ["productId"],
+      where: { status: "PAID" },
+      _count: { _all: true },
+      orderBy: { _count: { productId: "desc" } },
+      take: 5,
+    }),
+  ]);
+
+  const productRows = await prisma.product.findMany({
+    where: { id: { in: productSales.map((row) => row.productId) } },
+    select: { id: true, title: true },
+  });
+  const productTitleById = new Map(productRows.map((product) => [product.id, product.title]));
+  const daily = Array.from({ length: days }, (_, index) => {
+    const date = new Date(since);
+    date.setDate(since.getDate() + index);
+    const key = date.toISOString().slice(0, 10);
+    return { date: key, revenueStars: 0, newUsers: 0 };
+  });
+  const byDate = new Map(daily.map((entry) => [entry.date, entry]));
+  for (const order of paidOrders) {
+    const entry = byDate.get(order.createdAt.toISOString().slice(0, 10));
+    if (entry) entry.revenueStars += order.amountStarsFinal;
+  }
+  for (const user of users) {
+    const entry = byDate.get(user.createdAt.toISOString().slice(0, 10));
+    if (entry) entry.newUsers += 1;
+  }
+
+  res.json({
+    revenue: daily.map(({ date, revenueStars }) => ({ date, revenueStars })),
+    newUsers: daily.map(({ date, newUsers }) => ({ date, newUsers })),
+    ordersByStatus: ordersByStatus.map((row) => ({ status: row.status, count: row._count._all })),
+    topProducts: productSales.map((row) => ({
+      productId: row.productId,
+      title: productTitleById.get(row.productId) ?? "Product",
+      salesCount: row._count._all,
+    })),
+  });
+});
+
 adminRouter.get("/meta/languages", async (_req, res) => {
   res.json(await prisma.language.findMany({ orderBy: { code: "asc" } }));
 });
