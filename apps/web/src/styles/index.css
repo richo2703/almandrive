@@ -6,6 +6,26 @@
   background: #f7f3e9;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted-token: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 217 91% 60%;
+  --radius: 0.625rem;
   --paper: #f7f3e9;
   --surface: #fffdf8;
   --ink: #24231f;
@@ -18,6 +38,29 @@
   --sage-ink: #245b33;
   --rose: #f5dcda;
   --rose-ink: #8b302a;
+}
+
+:root[data-admin-theme="dark"],
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 5.5%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted-token: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 217 91% 60%;
 }
 
 * { box-sizing: border-box; }
@@ -260,40 +303,40 @@ p { line-height: 1.55; color: var(--muted); }
 .premium > svg { color: var(--amber); margin-bottom: 18px; }
 
 :root[data-admin-theme="dark"] {
-  --admin-bg-primary: #0a0a0a;
-  --admin-bg-secondary: #161616;
-  --admin-bg-tertiary: #1e1e1e;
-  --admin-bg-hover: #252525;
-  --admin-border: #2a2a2a;
-  --admin-border-hover: #3a3a3a;
-  --admin-text-primary: #ededed;
-  --admin-text-secondary: #9a9a9a;
-  --admin-text-tertiary: #6a6a6a;
-  --admin-accent: #4f8cff;
-  --admin-accent-hover: #6ea0ff;
+  --admin-bg-primary: hsl(var(--background));
+  --admin-bg-secondary: hsl(var(--card));
+  --admin-bg-tertiary: hsl(var(--secondary));
+  --admin-bg-hover: hsl(var(--accent));
+  --admin-border: hsl(var(--border));
+  --admin-border-hover: hsl(var(--ring));
+  --admin-text-primary: hsl(var(--foreground));
+  --admin-text-secondary: hsl(var(--muted-foreground));
+  --admin-text-tertiary: color-mix(in srgb, hsl(var(--muted-foreground)) 72%, hsl(var(--background)));
+  --admin-accent: hsl(var(--primary));
+  --admin-accent-hover: color-mix(in srgb, hsl(var(--primary)) 82%, hsl(var(--foreground)));
   --admin-success: #2ecc71;
   --admin-warning: #f5a623;
-  --admin-danger: #ef4444;
-  --admin-danger-hover: #f56565;
+  --admin-danger: hsl(0 84.2% 60.2%);
+  --admin-danger-hover: color-mix(in srgb, hsl(0 84.2% 60.2%) 82%, hsl(var(--foreground)));
   --admin-font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
 }
 
 :root[data-admin-theme="light"] {
-  --admin-bg-primary: #fafaf7;
-  --admin-bg-secondary: #f5f5f0;
-  --admin-bg-tertiary: #eeeee8;
-  --admin-bg-hover: #e7e7df;
-  --admin-border: #e0e0d8;
-  --admin-border-hover: #cfcfc6;
-  --admin-text-primary: #1a1a1a;
-  --admin-text-secondary: #5a5a5a;
-  --admin-text-tertiary: #7a7a73;
-  --admin-accent: #2457c5;
-  --admin-accent-hover: #183d91;
+  --admin-bg-primary: hsl(var(--background));
+  --admin-bg-secondary: hsl(var(--card));
+  --admin-bg-tertiary: hsl(var(--secondary));
+  --admin-bg-hover: hsl(var(--accent));
+  --admin-border: hsl(var(--border));
+  --admin-border-hover: hsl(var(--ring));
+  --admin-text-primary: hsl(var(--foreground));
+  --admin-text-secondary: hsl(var(--muted-foreground));
+  --admin-text-tertiary: color-mix(in srgb, hsl(var(--muted-foreground)) 72%, hsl(var(--background)));
+  --admin-accent: hsl(var(--primary));
+  --admin-accent-hover: color-mix(in srgb, hsl(var(--primary)) 82%, hsl(var(--foreground)));
   --admin-success: #0f9d58;
   --admin-warning: #c97b12;
-  --admin-danger: #c53030;
-  --admin-danger-hover: #ef4444;
+  --admin-danger: hsl(var(--destructive));
+  --admin-danger-hover: color-mix(in srgb, hsl(var(--destructive)) 82%, hsl(var(--foreground)));
   --admin-font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
 }
 
@@ -362,9 +405,10 @@ p { line-height: 1.55; color: var(--muted); }
 }
 
 .admin-nav__item.is-active {
-  color: var(--admin-text-primary);
+  color: hsl(var(--primary));
   border-color: var(--admin-accent);
-  background: color-mix(in srgb, var(--admin-accent) 14%, var(--admin-bg-secondary));
+  background: color-mix(in srgb, var(--admin-accent) 18%, var(--admin-bg-secondary));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--admin-accent) 22%, transparent);
 }
 
 .admin-sidebar__footer {
@@ -418,10 +462,10 @@ p { line-height: 1.55; color: var(--muted); }
 
 .admin-card {
   border: 1px solid var(--admin-border);
-  border-radius: 24px;
+  border-radius: 18px;
   background: var(--admin-bg-secondary);
   padding: 18px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 10px 24px color-mix(in srgb, hsl(var(--foreground)) 8%, transparent);
 }
 
 .admin-card__header {
@@ -573,7 +617,7 @@ p { line-height: 1.55; color: var(--muted); }
   border-radius: 14px;
   background: var(--admin-bg-secondary);
   color: var(--admin-text-primary);
-  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.24);
+  box-shadow: 0 18px 38px color-mix(in srgb, hsl(var(--foreground)) 18%, transparent);
 }
 
 .admin-select__item {
@@ -607,7 +651,7 @@ p { line-height: 1.55; color: var(--muted); }
   border: 1px solid var(--admin-border);
   border-radius: 7px;
   background: var(--admin-bg-secondary);
-  color: white;
+  color: hsl(var(--primary-foreground));
   cursor: pointer;
 }
 
@@ -640,7 +684,7 @@ p { line-height: 1.55; color: var(--muted); }
 
 .admin-button--primary {
   background: var(--admin-accent);
-  color: white;
+  color: hsl(var(--primary-foreground));
   border-color: transparent;
 }
 
