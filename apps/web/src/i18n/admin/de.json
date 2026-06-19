@@ -252,7 +252,10 @@
   },
   "preview": {
     "title": "Live-Vorschau",
-    "phone": "Handy-Vorschau"
+    "phone": "Handy-Vorschau",
+    "language": "Vorschau-Sprache",
+    "theme": "Vorschau-Design",
+    "telegram": "Telegram"
   },
   "upload": {
     "drop": "Bild hier ablegen oder anklicken",

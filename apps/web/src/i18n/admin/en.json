@@ -252,7 +252,10 @@
   },
   "preview": {
     "title": "Live preview",
-    "phone": "Phone preview"
+    "phone": "Phone preview",
+    "language": "Preview language",
+    "theme": "Preview theme",
+    "telegram": "Telegram"
   },
   "upload": {
     "drop": "Drop image here or click to select",
