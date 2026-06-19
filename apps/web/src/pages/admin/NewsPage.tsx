@@ -10,9 +10,13 @@ import { api, type Language, type NewsInput, type NewsItem } from "../../lib/api
 import { useApp } from "../../context/AppContext";
 import { AdminButton } from "../../components/admin/Button";
 import { AdminCard } from "../../components/admin/Card";
+import { DateTimePicker } from "../../components/admin/DateTimePicker";
 import { ImageUploader } from "../../components/admin/ImageUploader";
+import { Input } from "../../components/admin/Input";
 import { PhonePreviewFrame } from "../../components/admin/PhonePreviewFrame";
+import { Select } from "../../components/admin/Select";
 import { SortableList, SortableRow } from "../../components/admin/SortableList";
+import { Textarea } from "../../components/admin/Textarea";
 import { Toggle } from "../../components/admin/Toggle";
 
 const emptyNews: NewsInput = {
@@ -181,8 +185,8 @@ function NewsForm({
   return (
     <div className="admin-form">
       <ImageUploader value={draft.imageUrl} onChange={(url) => onChange({ ...draft, imageUrl: url })} category="news" label={t("news.coverImage")} />
-      <label className="admin-field"><span>{t("news.headline")}</span><input value={draft.title} onChange={(event) => onChange({ ...draft, title: event.target.value })} /></label>
-      <label className="admin-field"><span>{t("news.shortSummary")}</span><textarea maxLength={200} value={draft.excerpt ?? ""} onChange={(event) => onChange({ ...draft, excerpt: event.target.value })} /></label>
+      <Input label={t("news.headline")} value={draft.title} onChange={(event) => onChange({ ...draft, title: event.target.value })} />
+      <Textarea label={t("news.shortSummary")} maxLength={200} value={draft.excerpt ?? ""} onChange={(event) => onChange({ ...draft, excerpt: event.target.value })} />
       <div className="admin-field">
         <span>{t("news.content")}</span>
         <div className="admin-editor-toolbar">
@@ -216,17 +220,20 @@ function NewsForm({
         {editor ? <EditorContent editor={editor} /> : null}
       </div>
       <div className="admin-grid admin-grid--2">
-        <label className="admin-field">
-          <span>{t("news.language")}</span>
-          <select value={draft.languageCode ?? "all"} onChange={(event) => onChange({ ...draft, languageCode: event.target.value })}>
-            <option value="all">{t("common.all")}</option>
-            {languages.map((language) => <option key={language.code} value={language.code}>{language.code.toUpperCase()} · {language.name}</option>)}
-          </select>
-        </label>
-        <label className="admin-field">
-          <span>{t("news.published")}</span>
-          <input type="datetime-local" value={dateInput(draft.publishedAt)} onChange={(event) => onChange({ ...draft, publishedAt: parseDateInput(event.target.value) })} disabled={!draft.isPublished} />
-        </label>
+        <Select
+          label={t("news.language")}
+          value={draft.languageCode ?? "all"}
+          onChange={(value) => onChange({ ...draft, languageCode: value })}
+          options={[
+            { value: "all", label: t("common.all") },
+            ...languages.map((language) => ({ value: language.code, label: `${language.code.toUpperCase()} · ${language.name}` })),
+          ]}
+        />
+        <DateTimePicker
+          label={t("news.published")}
+          value={dateInput(draft.publishedAt)}
+          onChange={(value) => onChange({ ...draft, publishedAt: parseDateInput(value) })}
+        />
       </div>
       <Toggle checked={draft.isPublished} onChange={(value) => onChange({ ...draft, isPublished: value })} label={t("news.publishedOnly")} />
       <div className="admin-actions">

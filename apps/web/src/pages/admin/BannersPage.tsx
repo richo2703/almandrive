@@ -5,8 +5,11 @@ import { api, type Banner, type BannerInput, type Language } from "../../lib/api
 import { useApp } from "../../context/AppContext";
 import { AdminButton } from "../../components/admin/Button";
 import { AdminCard } from "../../components/admin/Card";
+import { DateTimePicker } from "../../components/admin/DateTimePicker";
 import { ImageUploader } from "../../components/admin/ImageUploader";
+import { Input } from "../../components/admin/Input";
 import { PhonePreviewFrame } from "../../components/admin/PhonePreviewFrame";
+import { Select } from "../../components/admin/Select";
 import { SortableList, SortableRow } from "../../components/admin/SortableList";
 import { Toggle } from "../../components/admin/Toggle";
 
@@ -156,38 +159,30 @@ function BannerForm({
   return (
     <div className="admin-form">
       <ImageUploader value={draft.imageUrl} onChange={(url) => onChange({ ...draft, imageUrl: url })} category="banners" label={t("banners.image")} />
-      <label className="admin-field"><span>{t("banners.titleField")}</span><input value={draft.title} onChange={(event) => onChange({ ...draft, title: event.target.value })} /></label>
-      <label className="admin-field"><span>{t("banners.subtitle")}</span><input value={draft.subtitle ?? ""} onChange={(event) => onChange({ ...draft, subtitle: event.target.value })} /></label>
-      <label className="admin-field"><span>{t("banners.buttonText")}</span><input value={draft.buttonText ?? ""} onChange={(event) => onChange({ ...draft, buttonText: event.target.value })} /></label>
-      <label className="admin-field"><span>{t("banners.buttonLink")}</span><input value={draft.buttonUrl ?? ""} onChange={(event) => onChange({ ...draft, buttonUrl: event.target.value })} /></label>
+      <Input label={t("banners.titleField")} value={draft.title} onChange={(event) => onChange({ ...draft, title: event.target.value })} />
+      <Input label={t("banners.subtitle")} value={draft.subtitle ?? ""} onChange={(event) => onChange({ ...draft, subtitle: event.target.value })} />
+      <Input label={t("banners.buttonText")} value={draft.buttonText ?? ""} onChange={(event) => onChange({ ...draft, buttonText: event.target.value })} />
+      <Input label={t("banners.buttonLink")} value={draft.buttonUrl ?? ""} onChange={(event) => onChange({ ...draft, buttonUrl: event.target.value })} />
       <div className="admin-grid admin-grid--2">
-        <label className="admin-field">
-          <span>{t("banners.whereToShow")}</span>
-          <select value={draft.placement} onChange={(event) => onChange({ ...draft, placement: event.target.value as BannerInput["placement"] })}>
-            {placements.map((placement) => (
-              <option key={placement} value={placement}>
-                {t(`banners.placement.${placement}`)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="admin-field">
-          <span>{t("banners.showForLanguages")}</span>
-          <select value={draft.languageCode ?? "all"} onChange={(event) => onChange({ ...draft, languageCode: event.target.value })}>
-            <option value="all">{t("banners.all")}</option>
-            {languages.map((language) => <option key={language.code} value={language.code}>{language.code.toUpperCase()} · {language.name}</option>)}
-          </select>
-        </label>
+        <Select
+          label={t("banners.whereToShow")}
+          value={draft.placement}
+          onChange={(value) => onChange({ ...draft, placement: value as BannerInput["placement"] })}
+          options={placements.map((placement) => ({ value: placement, label: t(`banners.placement.${placement}`) }))}
+        />
+        <Select
+          label={t("banners.showForLanguages")}
+          value={draft.languageCode ?? "all"}
+          onChange={(value) => onChange({ ...draft, languageCode: value })}
+          options={[
+            { value: "all", label: t("banners.all") },
+            ...languages.map((language) => ({ value: language.code, label: `${language.code.toUpperCase()} · ${language.name}` })),
+          ]}
+        />
       </div>
       <div className="admin-grid admin-grid--2">
-        <label className="admin-field">
-          <span>{t("banners.showFrom")}</span>
-          <input type="datetime-local" value={dateInput(draft.validFrom)} onChange={(event) => onChange({ ...draft, validFrom: parseDateInput(event.target.value) })} />
-        </label>
-        <label className="admin-field">
-          <span>{t("banners.showUntil")}</span>
-          <input type="datetime-local" value={dateInput(draft.validUntil)} onChange={(event) => onChange({ ...draft, validUntil: parseDateInput(event.target.value) })} />
-        </label>
+        <DateTimePicker label={t("banners.showFrom")} value={dateInput(draft.validFrom)} onChange={(value) => onChange({ ...draft, validFrom: parseDateInput(value) })} />
+        <DateTimePicker label={t("banners.showUntil")} value={dateInput(draft.validUntil)} onChange={(value) => onChange({ ...draft, validUntil: parseDateInput(value) })} />
       </div>
       <Toggle checked={draft.isActive} onChange={(value) => onChange({ ...draft, isActive: value })} label={t("banners.active")} />
       <div className="admin-actions">

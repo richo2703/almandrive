@@ -5,6 +5,8 @@ import { api, type Product, type ProductInput } from "../../lib/api";
 import { useApp } from "../../context/AppContext";
 import { AdminButton } from "../../components/admin/Button";
 import { AdminCard } from "../../components/admin/Card";
+import { Input } from "../../components/admin/Input";
+import { Textarea } from "../../components/admin/Textarea";
 import { Toggle } from "../../components/admin/Toggle";
 import { PhonePreviewFrame } from "../../components/admin/PhonePreviewFrame";
 import { SortableList, SortableRow } from "../../components/admin/SortableList";
@@ -216,34 +218,16 @@ function ProductForm({
   const { t } = useTranslation("translation");
   return (
     <div className="admin-form">
-      <label className="admin-field">
-        <span>{t("products.productName")}</span>
-        <input value={draft.title} onChange={(event) => onChange({ ...draft, title: event.target.value })} />
-      </label>
-      <label className="admin-field">
-        <span>{t("products.description")}</span>
-        <textarea value={draft.description ?? ""} onChange={(event) => onChange({ ...draft, description: event.target.value })} />
-      </label>
-      <label className="admin-field">
-        <span>{t("products.badge")}</span>
-        <input value={draft.badgeText ?? ""} onChange={(event) => onChange({ ...draft, badgeText: event.target.value })} placeholder={t("products.badgeHint")} />
-      </label>
+      <Input label={t("products.productName")} value={draft.title} onChange={(event) => onChange({ ...draft, title: event.target.value })} />
+      <Textarea label={t("products.description")} value={draft.description ?? ""} onChange={(event) => onChange({ ...draft, description: event.target.value })} />
+      <Input label={t("products.badge")} value={draft.badgeText ?? ""} onChange={(event) => onChange({ ...draft, badgeText: event.target.value })} placeholder={t("products.badgeHint")} />
       <div className="admin-grid admin-grid--2">
-        <label className="admin-field">
-          <span>{t("products.price")}</span>
-          <input type="number" min={1} value={draft.priceStars} onChange={(event) => onChange({ ...draft, priceStars: Number(event.target.value) })} />
-        </label>
-        <label className="admin-field">
-          <span>{t("products.oldPrice")}</span>
-          <input type="number" min={1} value={draft.oldPriceStars ?? ""} onChange={(event) => onChange({ ...draft, oldPriceStars: event.target.value ? Number(event.target.value) : null })} placeholder={t("products.oldPriceHint")} />
-        </label>
+        <Input label={t("products.price")} type="number" min={1} value={draft.priceStars} onChange={(event) => onChange({ ...draft, priceStars: Number(event.target.value) })} />
+        <Input label={t("products.oldPrice")} type="number" min={1} value={draft.oldPriceStars ?? ""} onChange={(event) => onChange({ ...draft, oldPriceStars: event.target.value ? Number(event.target.value) : null })} placeholder={t("products.oldPriceHint")} />
       </div>
       <Toggle checked={draft.isLifetime} onChange={(value) => onChange({ ...draft, isLifetime: value })} label={t("products.lifetime")} />
       {!draft.isLifetime ? (
-        <label className="admin-field">
-          <span>{t("products.accessDays")}</span>
-          <input type="number" min={1} value={draft.accessDays ?? 1} onChange={(event) => onChange({ ...draft, accessDays: Number(event.target.value) })} />
-        </label>
+        <Input label={t("products.accessDays")} type="number" min={1} value={draft.accessDays ?? 1} onChange={(event) => onChange({ ...draft, accessDays: Number(event.target.value) })} />
       ) : null}
       <Toggle checked={draft.isActive} onChange={(value) => onChange({ ...draft, isActive: value })} label={t("products.active")} />
       <div className="admin-actions">
