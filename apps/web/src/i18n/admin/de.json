@@ -118,7 +118,36 @@
     "deletePaidOrders": "Dieses Produkt hat bezahlte Bestellungen. Es wird deaktiviert statt gelöscht."
   },
   "promoCodes": {
-    "title": "Promo-Codes"
+    "title": "Promo-Codes",
+    "subtitle": "Zugangs- und Rabattcodes erstellen",
+    "new": "Neuer Promo-Code",
+    "empty": "Noch nichts vorhanden",
+    "form": "Promo-Code-Details",
+    "code": "Promo-Code",
+    "generate": "Generieren",
+    "type": "Typ",
+    "discountPercent": "Rabatt (%)",
+    "discountStars": "Rabatt (Stars)",
+    "accessDays": "Zugangstage",
+    "lifetime": "Lebenslang",
+    "maxUses": "Max. Nutzungen gesamt",
+    "maxUsesPerUser": "Max. Nutzungen pro Nutzer",
+    "validFrom": "Gültig ab",
+    "validUntil": "Gültig bis",
+    "linkedProduct": "Verknüpftes Produkt",
+    "linkedProductUnavailable": "Vom aktuellen Datenbankschema nicht unterstützt",
+    "active": "Aktiv",
+    "sortOrder": "Sortierung",
+    "deactivate": "Deaktivieren",
+    "usage": "Nutzungsstatistik",
+    "totalUses": "Nutzungen gesamt",
+    "noUsage": "Noch keine Nutzung",
+    "selectForUsage": "Promo-Code auswählen, um Nutzungen zu sehen.",
+    "types": {
+      "FREE_ACCESS": "Kostenloser Zugang",
+      "PERCENT_DISCOUNT": "Prozent-Rabatt",
+      "FIXED_STARS_DISCOUNT": "Stars-Rabatt"
+    }
   },
   "orders": {
     "title": "Bestellungen",

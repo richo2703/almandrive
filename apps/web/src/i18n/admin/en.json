@@ -118,7 +118,36 @@
     "deletePaidOrders": "This product has paid orders. It will be deactivated instead of deleted."
   },
   "promoCodes": {
-    "title": "Promo codes"
+    "title": "Promo codes",
+    "subtitle": "Create access and discount codes",
+    "new": "New promo code",
+    "empty": "Nothing here yet",
+    "form": "Promo code details",
+    "code": "Promo code",
+    "generate": "Generate",
+    "type": "Type",
+    "discountPercent": "Discount (%)",
+    "discountStars": "Discount (Stars)",
+    "accessDays": "Access days",
+    "lifetime": "Lifetime",
+    "maxUses": "Max uses (total)",
+    "maxUsesPerUser": "Max uses per user",
+    "validFrom": "Valid from",
+    "validUntil": "Valid until",
+    "linkedProduct": "Linked product",
+    "linkedProductUnavailable": "Not supported by current database schema",
+    "active": "Active",
+    "sortOrder": "Sort order",
+    "deactivate": "Deactivate",
+    "usage": "Usage statistics",
+    "totalUses": "Total uses",
+    "noUsage": "No usage yet",
+    "selectForUsage": "Select a promo code to see usage.",
+    "types": {
+      "FREE_ACCESS": "Free access",
+      "PERCENT_DISCOUNT": "Percent discount",
+      "FIXED_STARS_DISCOUNT": "Stars discount"
+    }
   },
   "orders": {
     "title": "Orders",

@@ -809,6 +809,99 @@ p { line-height: 1.55; color: var(--muted); }
   gap: 10px;
 }
 
+.admin-record-card {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  background: var(--admin-bg-primary);
+  color: var(--admin-text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-record-card.is-selected {
+  border-color: var(--admin-accent);
+  background: color-mix(in srgb, var(--admin-accent) 12%, var(--admin-bg-primary));
+}
+
+.admin-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  letter-spacing: 0.04em;
+}
+
+.admin-badge,
+.admin-status {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 0 9px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-bg-tertiary);
+  color: var(--admin-text-secondary);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.admin-status.is-success {
+  border-color: color-mix(in srgb, var(--admin-success) 36%, var(--admin-border));
+  color: var(--admin-success);
+}
+
+.admin-status.is-muted {
+  color: var(--admin-text-tertiary);
+}
+
+.admin-inline-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.admin-usage {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  color: var(--admin-text-secondary);
+  text-align: center;
+  border: 1px dashed var(--admin-border);
+  border-radius: 16px;
+  background: var(--admin-bg-primary);
+  padding: 18px;
+}
+
+.admin-skeleton-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-skeleton-list span,
+.admin-skeleton {
+  display: block;
+  min-height: 68px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, var(--admin-bg-primary), var(--admin-bg-tertiary), var(--admin-bg-primary));
+  background-size: 200% 100%;
+  animation: admin-pulse 1.25s ease-in-out infinite;
+}
+
+@keyframes admin-pulse {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
 .admin-list__item {
   display: flex;
   justify-content: space-between;
