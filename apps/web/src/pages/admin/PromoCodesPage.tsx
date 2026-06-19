@@ -2,6 +2,7 @@ import "../../i18n/admin";
 import { Tag } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { AdminButton } from "../../components/admin/Button";
 import { AdminCard } from "../../components/admin/Card";
 import { DateTimePicker } from "../../components/admin/DateTimePicker";
@@ -60,16 +61,26 @@ export function PromoCodesPage() {
   }
 
   async function save() {
-    const payload = normalizePromoCode(draft);
-    if (selectedId) await api.adminUpdatePromoCode(selectedId, payload);
-    else await api.adminCreatePromoCode(payload);
-    await reload(selectedId);
+    try {
+      const payload = normalizePromoCode(draft);
+      if (selectedId) await api.adminUpdatePromoCode(selectedId, payload);
+      else await api.adminCreatePromoCode(payload);
+      await reload(selectedId);
+      toast.success(t("toasts.promoCodeSaved"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.saveFailed"));
+    }
   }
 
   async function deactivate() {
     if (!selectedId) return;
-    await api.adminDeletePromoCode(selectedId);
-    await reload();
+    try {
+      await api.adminDeletePromoCode(selectedId);
+      await reload();
+      toast.success(t("toasts.promoCodeDeleted"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.deleteFailed"));
+    }
   }
 
   return (

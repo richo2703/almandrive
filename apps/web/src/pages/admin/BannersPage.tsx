@@ -1,6 +1,7 @@
 import "../../i18n/admin";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { api, type Banner, type BannerInput, type Language } from "../../lib/api";
 import { useApp } from "../../context/AppContext";
 import { AdminButton } from "../../components/admin/Button";
@@ -57,21 +58,31 @@ export function BannersPage() {
   if (!isAdmin) return null;
 
   async function save() {
-    const payload = normalizeBanner(draft);
-    if (selectedId) await api.adminUpdateBanner(selectedId, payload);
-    else await api.adminCreateBanner(payload);
-    const fresh = await api.adminBanners();
-    setItems(fresh);
-    setSelectedId(fresh[0]?.id ?? null);
-    setDraft(fromBanner(fresh[0] ?? emptyBannerAsBanner()));
+    try {
+      const payload = normalizeBanner(draft);
+      if (selectedId) await api.adminUpdateBanner(selectedId, payload);
+      else await api.adminCreateBanner(payload);
+      const fresh = await api.adminBanners();
+      setItems(fresh);
+      setSelectedId(fresh[0]?.id ?? null);
+      setDraft(fromBanner(fresh[0] ?? emptyBannerAsBanner()));
+      toast.success(t("toasts.bannerSaved"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.saveFailed"));
+    }
   }
 
   async function remove(id: string) {
-    await api.adminDeleteBanner(id);
-    const fresh = await api.adminBanners();
-    setItems(fresh);
-    setSelectedId(fresh[0]?.id ?? null);
-    setDraft(fromBanner(fresh[0] ?? emptyBannerAsBanner()));
+    try {
+      await api.adminDeleteBanner(id);
+      const fresh = await api.adminBanners();
+      setItems(fresh);
+      setSelectedId(fresh[0]?.id ?? null);
+      setDraft(fromBanner(fresh[0] ?? emptyBannerAsBanner()));
+      toast.success(t("toasts.bannerDeleted"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.deleteFailed"));
+    }
   }
 
   async function reorder(nextIds: string[]) {

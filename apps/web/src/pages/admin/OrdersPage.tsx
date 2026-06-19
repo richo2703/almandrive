@@ -3,6 +3,7 @@ import { ChevronDown, Download, Star } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { AdminButton } from "../../components/admin/Button";
 import { AdminCard } from "../../components/admin/Card";
 import { DateTimePicker } from "../../components/admin/DateTimePicker";
@@ -60,8 +61,13 @@ export function OrdersPage() {
   }
 
   async function updateStatus(order: PaymentOrder, status: "PAID" | "REFUNDED" | "CANCELLED") {
-    await api.adminUpdateOrderStatus(order.id, status);
-    await load();
+    try {
+      await api.adminUpdateOrderStatus(order.id, status);
+      await load();
+      toast.success(t("toasts.orderUpdated"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.saveFailed"));
+    }
   }
 
   function exportCsv() {

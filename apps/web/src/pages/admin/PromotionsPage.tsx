@@ -2,6 +2,7 @@ import "../../i18n/admin";
 import { Megaphone } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { AdminButton } from "../../components/admin/Button";
 import { AdminCard } from "../../components/admin/Card";
 import { ImageUploader } from "../../components/admin/ImageUploader";
@@ -64,16 +65,26 @@ export function PromotionsPage() {
   }
 
   async function save() {
-    const payload = normalizePromotion(draft);
-    if (selectedId) await api.adminUpdatePromotion(selectedId, payload);
-    else await api.adminCreatePromotion(payload);
-    await reload(selectedId);
+    try {
+      const payload = normalizePromotion(draft);
+      if (selectedId) await api.adminUpdatePromotion(selectedId, payload);
+      else await api.adminCreatePromotion(payload);
+      await reload(selectedId);
+      toast.success(t("toasts.promotionSaved"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.saveFailed"));
+    }
   }
 
   async function remove() {
     if (!selectedId) return;
-    await api.adminDeletePromotion(selectedId);
-    await reload(null);
+    try {
+      await api.adminDeletePromotion(selectedId);
+      await reload(null);
+      toast.success(t("toasts.promotionDeleted"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.deleteFailed"));
+    }
   }
 
   return (

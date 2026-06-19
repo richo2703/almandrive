@@ -1,6 +1,7 @@
 import "../../i18n/admin";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -79,21 +80,31 @@ export function NewsPage() {
   if (!isAdmin) return null;
 
   async function save() {
-    const payload = normalizeNews(draft);
-    if (selectedId) await api.adminUpdateNews(selectedId, payload);
-    else await api.adminCreateNews(payload);
-    const fresh = await api.adminNews();
-    setItems(fresh);
-    setSelectedId(fresh[0]?.id ?? null);
-    setDraft(fromNews(fresh[0] ?? emptyNewsAsItem()));
+    try {
+      const payload = normalizeNews(draft);
+      if (selectedId) await api.adminUpdateNews(selectedId, payload);
+      else await api.adminCreateNews(payload);
+      const fresh = await api.adminNews();
+      setItems(fresh);
+      setSelectedId(fresh[0]?.id ?? null);
+      setDraft(fromNews(fresh[0] ?? emptyNewsAsItem()));
+      toast.success(t("toasts.newsSaved"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.saveFailed"));
+    }
   }
 
   async function remove(id: string) {
-    await api.adminDeleteNews(id);
-    const fresh = await api.adminNews();
-    setItems(fresh);
-    setSelectedId(fresh[0]?.id ?? null);
-    setDraft(fromNews(fresh[0] ?? emptyNewsAsItem()));
+    try {
+      await api.adminDeleteNews(id);
+      const fresh = await api.adminNews();
+      setItems(fresh);
+      setSelectedId(fresh[0]?.id ?? null);
+      setDraft(fromNews(fresh[0] ?? emptyNewsAsItem()));
+      toast.success(t("toasts.newsDeleted"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.deleteFailed"));
+    }
   }
 
   async function reorder(nextIds: string[]) {

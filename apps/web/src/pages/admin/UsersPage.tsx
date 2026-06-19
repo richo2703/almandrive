@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Shield, UserPlus } from "lucide-react";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { AdminButton } from "../../components/admin/Button";
 import { AdminCard } from "../../components/admin/Card";
 import { Checkbox } from "../../components/admin/Checkbox";
@@ -109,11 +110,16 @@ export function UsersPage() {
           }
         : null,
     };
-    const created = await api.adminCreateUser(payload);
-    setSelected(created);
-    setCreateDraft(emptyCreate);
-    setShowCreate(false);
-    await loadUsers(1);
+    try {
+      const created = await api.adminCreateUser(payload);
+      setSelected(created);
+      setCreateDraft(emptyCreate);
+      setShowCreate(false);
+      await loadUsers(1);
+      toast.success(t("toasts.userCreated"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.saveFailed"));
+    }
   }
 
   async function refreshSelected() {
@@ -124,27 +130,47 @@ export function UsersPage() {
 
   async function toggleBlock() {
     if (!selected) return;
-    await api.adminBlockUser(selected.id, !selected.isBlocked, selected.adminNote ?? null);
-    await refreshSelected();
+    try {
+      await api.adminBlockUser(selected.id, !selected.isBlocked, selected.adminNote ?? null);
+      await refreshSelected();
+      toast.success(selected.isBlocked ? t("toasts.userUnblocked") : t("toasts.userBlocked"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.saveFailed"));
+    }
   }
 
   async function restoreUser() {
     if (!selected) return;
-    await api.adminRestoreUser(selected.id);
-    await refreshSelected();
+    try {
+      await api.adminRestoreUser(selected.id);
+      await refreshSelected();
+      toast.success(t("toasts.userRestored"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.saveFailed"));
+    }
   }
 
   async function softDeleteUser() {
     if (!selected) return;
-    await api.adminDeleteUser(selected.id);
-    await refreshSelected();
+    try {
+      await api.adminDeleteUser(selected.id);
+      await refreshSelected();
+      toast.success(t("toasts.userDeleted"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.deleteFailed"));
+    }
   }
 
   async function permanentDelete() {
     if (!selected || confirmPhrase !== "PERMANENTLY_DELETE") return;
-    await api.adminDeleteUserPermanent(selected.id);
-    setSelected(null);
-    await loadUsers();
+    try {
+      await api.adminDeleteUserPermanent(selected.id);
+      setSelected(null);
+      await loadUsers();
+      toast.success(t("toasts.userPermanentlyDeleted"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.deleteFailed"));
+    }
   }
 
   const totalPages = users?.totalPages ?? 1;

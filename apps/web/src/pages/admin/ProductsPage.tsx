@@ -1,6 +1,7 @@
 import "../../i18n/admin";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { api, type Product, type ProductInput } from "../../lib/api";
 import { useApp } from "../../context/AppContext";
 import { AdminButton } from "../../components/admin/Button";
@@ -70,18 +71,25 @@ export function ProductsPage() {
   }
 
   async function save() {
-    await persist(draft);
+    try {
+      await persist(draft);
+      toast.success(t("toasts.productSaved"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.saveFailed"));
+    }
   }
 
   async function remove(id: string) {
-    const result = await api.adminDeleteProduct(id);
-    if (result.deactivated && result.product) {
-      alert(t("products.deletePaidOrders"));
+    try {
+      const result = await api.adminDeleteProduct(id);
+      toast.success(result.deactivated && result.product ? t("products.deletePaidOrders") : t("toasts.productDeleted"));
+      const fresh = await api.adminProducts();
+      setItems(fresh);
+      setSelectedId(fresh[0]?.id ?? null);
+      setDraft(fromProduct(fresh[0] ?? emptyProductAsProduct()));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("toasts.deleteFailed"));
     }
-    const fresh = await api.adminProducts();
-    setItems(fresh);
-    setSelectedId(fresh[0]?.id ?? null);
-    setDraft(fromProduct(fresh[0] ?? emptyProductAsProduct()));
   }
 
   async function reorder(nextIds: string[]) {

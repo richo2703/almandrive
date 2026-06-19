@@ -266,7 +266,30 @@
     "remove": "Entfernen",
     "uploading": "Wird hochgeladen…",
     "unsupported": "Nicht unterstützter Dateityp. JPG, PNG, WebP oder GIF verwenden.",
-    "sizeHint": "Maximale Dateigröße: 5 MB"
+    "sizeHint": "Maximale Dateigröße: 5 MB",
+    "tooLarge": "Bild zu groß (max. 5 MB)",
+    "uploaded": "Bild hochgeladen"
+  },
+  "toasts": {
+    "saveFailed": "Speichern fehlgeschlagen",
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "productSaved": "Produkt gespeichert",
+    "productDeleted": "Produkt gelöscht",
+    "promoCodeSaved": "Promo-Code gespeichert",
+    "promoCodeDeleted": "Promo-Code deaktiviert",
+    "promotionSaved": "Aktion gespeichert",
+    "promotionDeleted": "Aktion gelöscht",
+    "orderUpdated": "Bestellung aktualisiert",
+    "bannerSaved": "Banner gespeichert",
+    "bannerDeleted": "Banner gelöscht",
+    "newsSaved": "News gespeichert",
+    "newsDeleted": "News gelöscht",
+    "userCreated": "Nutzer erstellt",
+    "userBlocked": "Nutzer gesperrt",
+    "userUnblocked": "Nutzer entsperrt",
+    "userRestored": "Nutzer wiederhergestellt",
+    "userDeleted": "Nutzer gelöscht",
+    "userPermanentlyDeleted": "Nutzer endgültig gelöscht"
   },
   "settings": {
     "title": "Einstellungen",

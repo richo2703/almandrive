@@ -1,6 +1,7 @@
 import { useRef, useState, type DragEvent } from "react";
 import { Upload, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { adminUploadImage } from "../../lib/api";
 import { AdminButton } from "./Button";
 
@@ -27,10 +28,12 @@ export function ImageUploader({
     if (!file) return;
     if (!allowedTypes.has(file.type)) {
       setError(t("upload.unsupported"));
+      toast.error(t("upload.unsupported"));
       return;
     }
     if (file.size > maxSize) {
       setError(t("upload.sizeHint"));
+      toast.error(t("upload.tooLarge"));
       return;
     }
     setUploading(true);
@@ -38,8 +41,11 @@ export function ImageUploader({
     try {
       const result = await adminUploadImage(file, category);
       onChange(result.url);
+      toast.success(t("upload.uploaded"));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("upload.unsupported"));
+      const message = reason instanceof Error ? reason.message : t("upload.unsupported");
+      setError(message);
+      toast.error(message);
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";

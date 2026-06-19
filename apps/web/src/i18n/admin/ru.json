@@ -266,7 +266,30 @@
     "remove": "Удалить",
     "uploading": "Загрузка…",
     "unsupported": "Неподдерживаемый тип файла. Используйте JPG, PNG, WebP или GIF.",
-    "sizeHint": "Максимальный размер: 5 MB"
+    "sizeHint": "Максимальный размер: 5 MB",
+    "tooLarge": "Изображение слишком большое (макс. 5 MB)",
+    "uploaded": "Изображение загружено"
+  },
+  "toasts": {
+    "saveFailed": "Не удалось сохранить",
+    "deleteFailed": "Не удалось удалить",
+    "productSaved": "Продукт сохранён",
+    "productDeleted": "Продукт удалён",
+    "promoCodeSaved": "Промокод сохранён",
+    "promoCodeDeleted": "Промокод деактивирован",
+    "promotionSaved": "Акция сохранена",
+    "promotionDeleted": "Акция удалена",
+    "orderUpdated": "Заказ обновлён",
+    "bannerSaved": "Баннер сохранён",
+    "bannerDeleted": "Баннер удалён",
+    "newsSaved": "Новость сохранена",
+    "newsDeleted": "Новость удалена",
+    "userCreated": "Пользователь создан",
+    "userBlocked": "Пользователь заблокирован",
+    "userUnblocked": "Пользователь разблокирован",
+    "userRestored": "Пользователь восстановлен",
+    "userDeleted": "Пользователь удалён",
+    "userPermanentlyDeleted": "Пользователь удалён навсегда"
   },
   "settings": {
     "title": "Настройки",

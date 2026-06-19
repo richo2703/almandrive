@@ -6,6 +6,7 @@ import { useApp } from "../../context/AppContext";
 import { AdminSidebar } from "../../components/admin/Sidebar";
 import { Topbar } from "../../components/admin/Topbar";
 import { useTranslation } from "react-i18next";
+import { Toaster } from "sonner";
 
 export function AdminLayout() {
   const { isAdmin } = useApp();
@@ -27,6 +28,7 @@ export function AdminLayout() {
 
   return (
     <div className="admin-app">
+      <Toaster richColors position="top-right" />
       <AdminSidebar onLogout={logout} />
       <section className="admin-main">
         <Topbar query={query} onChange={setQuery} />
