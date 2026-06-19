@@ -185,13 +185,15 @@ export const api = {
     request<{ count: number }>(`/api/admin/users/${id}/revoke-access`, { method: "POST", body: JSON.stringify(payload) }),
   adminBlockUser: (id: string, isBlocked: boolean, adminNote?: string | null) =>
     request<UserRecord>(`/api/admin/users/${id}/block`, { method: "PATCH", body: JSON.stringify({ isBlocked, adminNote }) }),
-  adminOrders: (filters: { status?: string; userId?: string; from?: string; to?: string } = {}) => {
+  adminOrders: (filters: { status?: string; userId?: string; from?: string; to?: string; minAmount?: string; maxAmount?: string; promoCode?: string } = {}) => {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(filters)) {
       if (value) params.set(key, value);
     }
     return request<PaymentOrder[]>(`/api/admin/orders${params.toString() ? `?${params.toString()}` : ""}`);
   },
+  adminUpdateOrderStatus: (id: string, status: "PENDING" | "PAID" | "FAILED" | "REFUNDED" | "CANCELLED") =>
+    request<PaymentOrder>(`/api/admin/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
   adminBanners: () => request<Banner[]>("/api/admin/banners"),
   adminCreateBanner: (payload: Partial<BannerInput>) =>
     request<Banner>("/api/admin/banners", { method: "POST", body: JSON.stringify(payload) }),

@@ -653,17 +653,39 @@ adminRouter.get("/orders", async (req, res) => {
   const userId = String(req.query.userId ?? "");
   const from = String(req.query.from ?? "");
   const to = String(req.query.to ?? "");
+  const minAmount = String(req.query.minAmount ?? "");
+  const maxAmount = String(req.query.maxAmount ?? "");
+  const promoCode = String(req.query.promoCode ?? "").trim();
+  const normalizedStatus = status === "CANCELLED" ? "FAILED" : status;
   const orders = await prisma.paymentOrder.findMany({
     where: {
-      ...(status ? { status: status as any } : {}),
+      ...(normalizedStatus ? { status: normalizedStatus as any } : {}),
       ...(userId ? { userId } : {}),
       ...(from || to ? { createdAt: { ...(from ? { gte: new Date(from) } : {}), ...(to ? { lte: new Date(to) } : {}) } } : {}),
+      ...(minAmount || maxAmount ? { amountStarsFinal: { ...(minAmount ? { gte: Number(minAmount) } : {}), ...(maxAmount ? { lte: Number(maxAmount) } : {}) } } : {}),
+      ...(promoCode ? { promoCode: { code: { contains: promoCode.toUpperCase(), mode: "insensitive" } } } : {}),
     },
     orderBy: { createdAt: "desc" },
     include: { user: true, product: true, promoCode: true },
     take: 250,
   });
   res.json(orders.map(serializePaymentOrder));
+});
+
+adminRouter.patch("/orders/:id/status", async (req, res) => {
+  const { status } = z.object({
+    status: z.enum(["PENDING", "PAID", "FAILED", "REFUNDED", "CANCELLED"]),
+  }).parse(req.body);
+  const nextStatus = status === "CANCELLED" ? "FAILED" : status;
+  const order = await prisma.paymentOrder.update({
+    where: { id: req.params.id },
+    data: {
+      status: nextStatus as any,
+      ...(nextStatus === "PAID" ? { paidAt: new Date() } : {}),
+    },
+    include: { user: true, product: true, promoCode: true },
+  });
+  res.json(serializePaymentOrder(order));
 });
 
 adminRouter.get("/banners", async (_req, res) => {

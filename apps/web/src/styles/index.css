@@ -784,6 +784,11 @@ p { line-height: 1.55; color: var(--muted); }
   color: var(--admin-danger);
 }
 
+.admin-status.is-info {
+  border-color: color-mix(in srgb, var(--admin-accent) 36%, var(--admin-border));
+  color: var(--admin-accent);
+}
+
 .admin-pagination {
   display: flex;
   align-items: center;
@@ -791,6 +796,73 @@ p { line-height: 1.55; color: var(--muted); }
   gap: 12px;
   margin-top: 16px;
   color: var(--admin-text-secondary);
+}
+
+.admin-filter-toggle {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  background: var(--admin-bg-primary);
+  color: var(--admin-text-primary);
+  padding: 0 14px;
+  font-weight: 700;
+}
+
+.admin-filter-toggle svg {
+  transition: transform 150ms ease-out;
+}
+
+.admin-filter-toggle svg.is-open {
+  transform: rotate(180deg);
+}
+
+.admin-filter-panel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  background: var(--admin-bg-primary);
+}
+
+.admin-order-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-order-card {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--admin-border);
+  border-radius: 18px;
+  background: var(--admin-bg-secondary);
+}
+
+.admin-order-card h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 6px;
+  font-size: 1.15rem;
+}
+
+.admin-order-card p {
+  margin: 4px 0;
+  color: var(--admin-text-secondary);
+}
+
+.admin-link {
+  color: var(--admin-accent);
+  font-weight: 700;
 }
 
 .admin-overlay {

@@ -165,7 +165,33 @@
   },
   "orders": {
     "title": "Заказы",
-    "filter": "Фильтр"
+    "filter": "Фильтр",
+    "summary": "{{count}} заказов · {{total}} Stars",
+    "exportCsv": "Экспорт CSV",
+    "status": "Статус",
+    "userId": "ID пользователя",
+    "from": "С",
+    "to": "До",
+    "minAmount": "Мин. сумма",
+    "maxAmount": "Макс. сумма",
+    "promoCode": "Использованный промокод",
+    "apply": "Применить",
+    "reset": "Сбросить",
+    "empty": "Заказы не найдены",
+    "stars": "Stars",
+    "product": "Продукт",
+    "days": "дней",
+    "confirmManually": "Подтвердить вручную",
+    "refund": "Вернуть",
+    "cancel": "Отменить",
+    "statuses": {
+      "all": "Все",
+      "PENDING": "Ожидает",
+      "PAID": "Оплачен",
+      "CANCELLED": "Отменён",
+      "FAILED": "Отменён",
+      "REFUNDED": "Возврат"
+    }
   },
   "banners": {
     "title": "Баннеры",

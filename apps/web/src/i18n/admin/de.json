@@ -165,7 +165,33 @@
   },
   "orders": {
     "title": "Bestellungen",
-    "filter": "Filtern"
+    "filter": "Filter",
+    "summary": "{{count}} Bestellungen · {{total}} Stars",
+    "exportCsv": "CSV exportieren",
+    "status": "Status",
+    "userId": "Nutzer-ID",
+    "from": "Von",
+    "to": "Bis",
+    "minAmount": "Mindestbetrag",
+    "maxAmount": "Höchstbetrag",
+    "promoCode": "Verwendeter Promo-Code",
+    "apply": "Anwenden",
+    "reset": "Zurücksetzen",
+    "empty": "Keine Bestellungen gefunden",
+    "stars": "Stars",
+    "product": "Produkt",
+    "days": "Tage",
+    "confirmManually": "Manuell bestätigen",
+    "refund": "Erstatten",
+    "cancel": "Stornieren",
+    "statuses": {
+      "all": "Alle",
+      "PENDING": "Ausstehend",
+      "PAID": "Bezahlt",
+      "CANCELLED": "Storniert",
+      "FAILED": "Storniert",
+      "REFUNDED": "Erstattet"
+    }
   },
   "banners": {
     "title": "Banner",

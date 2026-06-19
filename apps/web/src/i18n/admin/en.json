@@ -165,7 +165,33 @@
   },
   "orders": {
     "title": "Orders",
-    "filter": "Filter"
+    "filter": "Filter",
+    "summary": "{{count}} orders · {{total}} Stars",
+    "exportCsv": "Export to CSV",
+    "status": "Status",
+    "userId": "User ID",
+    "from": "From",
+    "to": "To",
+    "minAmount": "Min amount",
+    "maxAmount": "Max amount",
+    "promoCode": "Promo code used",
+    "apply": "Apply",
+    "reset": "Reset",
+    "empty": "No orders found",
+    "stars": "Stars",
+    "product": "Product",
+    "days": "days",
+    "confirmManually": "Confirm manually",
+    "refund": "Refund",
+    "cancel": "Cancel",
+    "statuses": {
+      "all": "All",
+      "PENDING": "Pending",
+      "PAID": "Paid",
+      "CANCELLED": "Cancelled",
+      "FAILED": "Cancelled",
+      "REFUNDED": "Refunded"
+    }
   },
   "banners": {
     "title": "Banners",
