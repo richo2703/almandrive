@@ -1,12 +1,31 @@
 import { Router } from "express";
 import { Prisma, prisma } from "@theorie-direkt/database";
+import multer from "multer";
+import { mkdir, writeFile } from "node:fs/promises";
+import { extname, resolve } from "node:path";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { requireAdmin, resolveAdminIdentity } from "../middleware/admin-session.js";
 import { env } from "../config/env.js";
 import { adminLoginRateLimit } from "../middleware/rate-limit.js";
 import { createAdminSessionToken, clearAdminSessionCookie, setAdminSessionCookie, verifyAdminPassword } from "../utils/admin-session.js";
+import { getMediaRootDir } from "../utils/media.js";
 
 export const adminRouter = Router();
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+const allowedUploadCategories = ["banners", "promotions", "news"] as const;
+const allowedUploadExtensions = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
+
+function getUploadDirectory(category: typeof allowedUploadCategories[number]) {
+  return resolve(getMediaRootDir(), "images", category);
+}
+
+function getUploadUrl(category: typeof allowedUploadCategories[number], filename: string) {
+  return `/media/images/${category}/${filename}`;
+}
 
 const productSchema = z.object({
   title: z.string().min(1),
@@ -114,6 +133,10 @@ const newsSchema = z.object({
   sortOrder: z.coerce.number().int().default(0),
 });
 
+const uploadSchema = z.object({
+  category: z.enum(allowedUploadCategories),
+});
+
 function parseDate(value?: string | null) {
   return value ? new Date(value) : null;
 }
@@ -214,6 +237,25 @@ adminRouter.get("/me", async (req, res) => {
 });
 
 adminRouter.use(requireAdmin);
+
+adminRouter.post("/upload", upload.single("file"), async (req, res) => {
+  const { category } = uploadSchema.parse(req.body);
+  const file = req.file;
+  if (!file) {
+    res.status(400).json({ error: "File is required." });
+    return;
+  }
+  const extension = extname(file.originalname).toLowerCase();
+  if (!allowedUploadExtensions.has(extension)) {
+    res.status(400).json({ error: "Unsupported file type." });
+    return;
+  }
+  const filename = `${randomUUID()}${extension}`;
+  const directory = getUploadDirectory(category);
+  await mkdir(directory, { recursive: true });
+  await writeFile(resolve(directory, filename), file.buffer);
+  res.status(201).json({ url: getUploadUrl(category, filename), filename });
+});
 
 function createAdminSessionCookie(username: string) {
   if (!env.ADMIN_SESSION_SECRET) throw new Error("ADMIN_SESSION_SECRET is not configured.");

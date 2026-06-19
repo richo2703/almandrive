@@ -13,6 +13,7 @@ import { shopRouter } from "./routes/shop.js";
 import { adminRouter } from "./routes/admin.js";
 import { requireAuth } from "./middleware/auth.js";
 import { errorHandler } from "./middleware/error.js";
+import { getMediaRootDir } from "./utils/media.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -27,6 +28,9 @@ app.use(helmet({
 }));
 app.use(cors({ origin: env.WEB_APP_URL, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
+
+const mediaRootPath = getMediaRootDir();
+app.use("/media", express.static(mediaRootPath));
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/auth", authRouter);

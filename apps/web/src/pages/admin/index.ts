@@ -1,0 +1,11 @@
+export { AdminLayout } from "./AdminLayout";
+export { AdminLoginPage } from "./AdminLoginPage";
+export { DashboardPage } from "./DashboardPage";
+export { ProductsPage } from "./ProductsPage";
+export { PromoCodesPage } from "./PromoCodesPage";
+export { UsersPage } from "./UsersPage";
+export { OrdersPage } from "./OrdersPage";
+export { BannersPage } from "./BannersPage";
+export { PromotionsPage } from "./PromotionsPage";
+export { NewsPage } from "./NewsPage";
+export { SettingsPage } from "./SettingsPage";

@@ -1,0 +1,196 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "promoCodes": "Promo codes",
+    "users": "Users",
+    "orders": "Orders",
+    "banners": "Banners",
+    "promotions": "Promotions",
+    "news": "News",
+    "settings": "Settings"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "active": "Active",
+    "inactive": "Inactive",
+    "yes": "Yes",
+    "no": "No",
+    "search": "Search",
+    "loading": "Loading",
+    "logout": "Logout",
+    "signOut": "Sign out",
+    "addNew": "Add new",
+    "restore": "Restore",
+    "preview": "Preview",
+    "all": "All",
+    "theme": "Theme",
+    "language": "Language",
+    "upload": "Upload",
+    "remove": "Remove"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "layout": {
+    "title": "Alman Drive",
+    "subtitle": "Admin control panel",
+    "searchPlaceholder": "Search products, users, orders..."
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Use your admin username and password to open the control panel.",
+    "username": "Username",
+    "password": "Password",
+    "button": "Sign in",
+    "signingIn": "Signing in…",
+    "error": "Login failed."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "overview": "Overview",
+    "intro": "A quick snapshot of users, revenue, orders, and content health.",
+    "totalUsers": "Total users",
+    "activeSubscribers": "Active subscribers",
+    "revenueStars": "Revenue Stars",
+    "ordersToday": "Orders today",
+    "ordersMonth": "Orders this month",
+    "activePromoCodes": "Active promo codes",
+    "activeBanners": "Active banners",
+    "adminIds": "Admin IDs",
+    "recentOrders": "Recent orders",
+    "recentUsers": "Recent users"
+  },
+  "users": {
+    "title": "Users",
+    "addUser": "Add user",
+    "showDeleted": "Show deleted",
+    "searchPlaceholder": "Search by Telegram ID, username, first or last name",
+    "selectedUser": "Selected user",
+    "paymentHistory": "Payment history",
+    "promoUsage": "Promo usage",
+    "dangerZone": "Danger zone",
+    "deleteUser": "Delete user",
+    "restoreUser": "Restore",
+    "permanentDelete": "Permanently delete",
+    "deleteConfirm": "Delete this user? They will be hidden but order history is preserved. You can restore them later.",
+    "restoreConfirm": "Restore this user? Previous accesses will NOT be restored automatically.",
+    "permanentConfirm": "PERMANENTLY delete this user? This cannot be undone.",
+    "permanentPrompt": "Type PERMANENTLY_DELETE to confirm:",
+    "deletedOn": "Deleted on {date}",
+    "deletedTag": "Deleted",
+    "create": {
+      "title": "Add user",
+      "telegramId": "Telegram ID",
+      "username": "Username",
+      "usernameHint": "without @",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "language": "Language",
+      "category": "Category",
+      "adminNote": "Admin note",
+      "grantAccess": "Grant access immediately",
+      "byDays": "By days",
+      "lifetime": "Lifetime",
+      "accessDays": "Access days",
+      "reason": "Reason"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "new": "New product",
+    "productName": "Product name",
+    "description": "Description",
+    "badge": "Badge (optional)",
+    "badgeHint": "Short label like 'Best deal' or 'Popular'",
+    "price": "Price (Telegram Stars)",
+    "oldPrice": "Old price (for discount)",
+    "oldPriceHint": "Leave empty if no discount. Shown crossed-out in the app.",
+    "access": "Access",
+    "lifetime": "Lifetime access",
+    "accessDays": "Access duration (days)",
+    "active": "Active",
+    "deletePaidOrders": "This product has paid orders. It will be deactivated instead of deleted."
+  },
+  "promoCodes": {
+    "title": "Promo codes"
+  },
+  "orders": {
+    "title": "Orders",
+    "filter": "Filter"
+  },
+  "banners": {
+    "title": "Banners",
+    "new": "New banner",
+    "content": "Content",
+    "cta": "Call to action",
+    "display": "Display",
+    "schedule": "Schedule",
+    "titleField": "Title",
+    "subtitle": "Subtitle",
+    "image": "Image",
+    "buttonText": "Button text",
+    "buttonLink": "Button link",
+    "whereToShow": "Where to show",
+    "showForLanguages": "Show for languages",
+    "all": "All",
+    "active": "Active",
+    "sortOrder": "Sort order",
+    "showFrom": "Show from",
+    "showUntil": "Show until",
+    "placement": {
+      "HOME_TOP": "Home top",
+      "HOME_MIDDLE": "Home middle",
+      "PRICING_TOP": "Pricing top",
+      "QUIZ_BOTTOM": "Quiz bottom",
+      "LEARN_TOP": "Learn top"
+    }
+  },
+  "promotions": {
+    "title": "Promotions"
+  },
+  "news": {
+    "title": "News",
+    "new": "New post",
+    "headline": "Headline",
+    "shortSummary": "Short summary",
+    "content": "Content",
+    "coverImage": "Cover image",
+    "language": "Language",
+    "published": "Published",
+    "draft": "Draft",
+    "publishedOnly": "Only published posts are visible in the app"
+  },
+  "preview": {
+    "title": "Live preview",
+    "phone": "Phone preview"
+  },
+  "upload": {
+    "drop": "Drop image here or click to select",
+    "remove": "Remove",
+    "uploading": "Uploading…",
+    "unsupported": "Unsupported file type. Use JPG, PNG, WebP, or GIF.",
+    "sizeHint": "Max file size: 5 MB"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "account": "Account",
+    "about": "About"
+  },
+  "editor": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "heading2": "H2",
+    "heading3": "H3",
+    "bulletList": "Bullets",
+    "orderedList": "Numbered",
+    "link": "Link",
+    "insertImage": "Image URL"
+  }
+}

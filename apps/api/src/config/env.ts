@@ -17,6 +17,7 @@ export const env = z.object({
   TELEGRAM_AUTH_MAX_AGE_SECONDS: z.coerce.number().int().positive().default(86400),
   DEV_AUTH_ENABLED: z.string().default("false").transform((value) => value === "true"),
   DEV_AUTH_ALLOW_IN_PRODUCTION: z.string().default("false").transform((value) => value === "true"),
+  MEDIA_ROOT_DIR: z.string().default(""),
   DEV_ADMIN_TELEGRAM_ID: z.string().default("").transform((value) => (value ? BigInt(value) : null)),
   ADMIN_USERNAME: z.string().default("admin"),
   ADMIN_PASSWORD_HASH: z.string().default(""),

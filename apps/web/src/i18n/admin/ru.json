@@ -1,0 +1,196 @@
+{
+  "nav": {
+    "dashboard": "Дашборд",
+    "products": "Продукты",
+    "promoCodes": "Промокоды",
+    "users": "Пользователи",
+    "orders": "Заказы",
+    "banners": "Баннеры",
+    "promotions": "Акции",
+    "news": "Новости",
+    "settings": "Настройки"
+  },
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Изменить",
+    "create": "Создать",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "yes": "Да",
+    "no": "Нет",
+    "search": "Поиск",
+    "loading": "Загрузка",
+    "logout": "Выйти",
+    "signOut": "Выйти",
+    "addNew": "Добавить",
+    "restore": "Восстановить",
+    "preview": "Предпросмотр",
+    "all": "Все",
+    "theme": "Тема",
+    "language": "Язык",
+    "upload": "Загрузить",
+    "remove": "Удалить"
+  },
+  "theme": {
+    "light": "Светлая",
+    "dark": "Тёмная"
+  },
+  "layout": {
+    "title": "Alman Drive",
+    "subtitle": "Панель администратора",
+    "searchPlaceholder": "Поиск продуктов, пользователей, заказов..."
+  },
+  "login": {
+    "title": "Вход",
+    "subtitle": "Войдите с помощью имени пользователя и пароля администратора.",
+    "username": "Имя пользователя",
+    "password": "Пароль",
+    "button": "Войти",
+    "signingIn": "Вход…",
+    "error": "Не удалось войти."
+  },
+  "dashboard": {
+    "title": "Дашборд",
+    "overview": "Обзор",
+    "intro": "Краткая сводка по пользователям, доходу, заказам и контенту.",
+    "totalUsers": "Всего пользователей",
+    "activeSubscribers": "Активные подписчики",
+    "revenueStars": "Доход в Stars",
+    "ordersToday": "Заказы сегодня",
+    "ordersMonth": "Заказы за месяц",
+    "activePromoCodes": "Активные промокоды",
+    "activeBanners": "Активные баннеры",
+    "adminIds": "Admin ID",
+    "recentOrders": "Последние заказы",
+    "recentUsers": "Последние пользователи"
+  },
+  "users": {
+    "title": "Пользователи",
+    "addUser": "Добавить пользователя",
+    "showDeleted": "Показывать удалённых",
+    "searchPlaceholder": "Поиск по Telegram ID, username, имени или фамилии",
+    "selectedUser": "Выбранный пользователь",
+    "paymentHistory": "История платежей",
+    "promoUsage": "Использование промокодов",
+    "dangerZone": "Опасная зона",
+    "deleteUser": "Удалить пользователя",
+    "restoreUser": "Восстановить",
+    "permanentDelete": "Удалить навсегда",
+    "deleteConfirm": "Удалить этого пользователя? Он будет скрыт, но история заказов сохранится. Его можно восстановить позже.",
+    "restoreConfirm": "Восстановить этого пользователя? Ранее выданные доступы НЕ будут восстановлены автоматически.",
+    "permanentConfirm": "УДАЛИТЬ этого пользователя НАВСЕГДА? Это нельзя отменить.",
+    "permanentPrompt": "Введите PERMANENTLY_DELETE для подтверждения:",
+    "deletedOn": "Удалён {date}",
+    "deletedTag": "Удалён",
+    "create": {
+      "title": "Добавить пользователя",
+      "telegramId": "Telegram ID",
+      "username": "Username",
+      "usernameHint": "без @",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "language": "Язык",
+      "category": "Категория",
+      "adminNote": "Заметка администратора",
+      "grantAccess": "Сразу выдать доступ",
+      "byDays": "По дням",
+      "lifetime": "Пожизненно",
+      "accessDays": "Дней доступа",
+      "reason": "Причина"
+    }
+  },
+  "products": {
+    "title": "Продукты",
+    "new": "Новый продукт",
+    "productName": "Название продукта",
+    "description": "Описание",
+    "badge": "Бейдж (необязательно)",
+    "badgeHint": "Короткая метка вроде 'Лучшее предложение' или 'Популярно'",
+    "price": "Цена (Telegram Stars)",
+    "oldPrice": "Старая цена (для скидки)",
+    "oldPriceHint": "Оставьте пустым, если скидки нет. Показывается зачёркнутой в приложении.",
+    "access": "Доступ",
+    "lifetime": "Пожизненный доступ",
+    "accessDays": "Срок доступа (дни)",
+    "active": "Активен",
+    "deletePaidOrders": "У этого продукта есть оплаченные заказы. Он будет деактивирован, а не удалён."
+  },
+  "promoCodes": {
+    "title": "Промокоды"
+  },
+  "orders": {
+    "title": "Заказы",
+    "filter": "Фильтр"
+  },
+  "banners": {
+    "title": "Баннеры",
+    "new": "Новый баннер",
+    "content": "Контент",
+    "cta": "Призыв к действию",
+    "display": "Показ",
+    "schedule": "Расписание",
+    "titleField": "Заголовок",
+    "subtitle": "Подзаголовок",
+    "image": "Изображение",
+    "buttonText": "Текст кнопки",
+    "buttonLink": "Ссылка кнопки",
+    "whereToShow": "Где показывать",
+    "showForLanguages": "Показывать для языков",
+    "all": "Все",
+    "active": "Активен",
+    "sortOrder": "Порядок",
+    "showFrom": "Показывать с",
+    "showUntil": "Показывать до",
+    "placement": {
+      "HOME_TOP": "Главная сверху",
+      "HOME_MIDDLE": "Главная середина",
+      "PRICING_TOP": "Цены сверху",
+      "QUIZ_BOTTOM": "Квиз снизу",
+      "LEARN_TOP": "Обучение сверху"
+    }
+  },
+  "promotions": {
+    "title": "Акции"
+  },
+  "news": {
+    "title": "Новости",
+    "new": "Новый пост",
+    "headline": "Заголовок",
+    "shortSummary": "Краткое описание",
+    "content": "Контент",
+    "coverImage": "Обложка",
+    "language": "Язык",
+    "published": "Опубликовано",
+    "draft": "Черновик",
+    "publishedOnly": "Только опубликованные посты видны в приложении"
+  },
+  "preview": {
+    "title": "Живой предпросмотр",
+    "phone": "Предпросмотр телефона"
+  },
+  "upload": {
+    "drop": "Перетащите изображение сюда или нажмите для выбора",
+    "remove": "Удалить",
+    "uploading": "Загрузка…",
+    "unsupported": "Неподдерживаемый тип файла. Используйте JPG, PNG, WebP или GIF.",
+    "sizeHint": "Максимальный размер: 5 MB"
+  },
+  "settings": {
+    "title": "Настройки",
+    "appearance": "Внешний вид",
+    "account": "Аккаунт",
+    "about": "О приложении"
+  },
+  "editor": {
+    "bold": "Жирный",
+    "italic": "Курсив",
+    "heading2": "H2",
+    "heading3": "H3",
+    "bulletList": "Список",
+    "orderedList": "Нумерованный",
+    "link": "Ссылка",
+    "insertImage": "URL изображения"
+  }
+}

@@ -7,7 +7,12 @@ import { readSessionToken } from "../utils/telegram.js";
 async function resolveTelegramAdmin(req: Request) {
   const token = req.headers.authorization?.replace(/^Bearer\s+/i, "");
   if (!token) return null;
-  const userId = readSessionToken(token, env.TELEGRAM_BOT_TOKEN || "local-development-secret");
+  let userId: string;
+  try {
+    userId = readSessionToken(token, env.TELEGRAM_BOT_TOKEN || "local-development-secret");
+  } catch {
+    return null;
+  }
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { telegramId: true, isAdmin: true, isBlocked: true },

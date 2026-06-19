@@ -1,6 +1,6 @@
 import type { ApiQuestion } from "@theorie-direkt/shared";
 
-const API_URL =
+export const API_URL =
   import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? "http://localhost:4000" : window.location.origin);
 
 let authToken = localStorage.getItem("theorie-token");
@@ -215,6 +215,22 @@ export const api = {
     request<{ deleted: boolean }>(`/api/admin/news/${id}`, { method: "DELETE" }),
   adminSettings: () => request<{ adminTelegramIds: string[] }>("/api/admin/settings"),
 };
+
+export async function adminUploadImage(file: File, category: "banners" | "promotions" | "news") {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("category", category);
+  const response = await fetch(`${API_URL}/api/admin/upload`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new ApiError(body.message ?? body.error ?? `Request failed (${response.status})`, response.status, body.code, body);
+  }
+  return body as { url: string; filename: string };
+}
 
 export interface Language {
   id: string;

@@ -1,0 +1,196 @@
+{
+  "nav": {
+    "dashboard": "Übersicht",
+    "products": "Produkte",
+    "promoCodes": "Promo-Codes",
+    "users": "Nutzer",
+    "orders": "Bestellungen",
+    "banners": "Banner",
+    "promotions": "Aktionen",
+    "news": "News",
+    "settings": "Einstellungen"
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "create": "Erstellen",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "yes": "Ja",
+    "no": "Nein",
+    "search": "Suche",
+    "loading": "Lädt",
+    "logout": "Abmelden",
+    "signOut": "Abmelden",
+    "addNew": "Neu hinzufügen",
+    "restore": "Wiederherstellen",
+    "preview": "Vorschau",
+    "all": "Alle",
+    "theme": "Design",
+    "language": "Sprache",
+    "upload": "Hochladen",
+    "remove": "Entfernen"
+  },
+  "theme": {
+    "light": "Hell",
+    "dark": "Dunkel"
+  },
+  "layout": {
+    "title": "Alman Drive",
+    "subtitle": "Admin-Steuerzentrale",
+    "searchPlaceholder": "Produkte, Nutzer, Bestellungen suchen..."
+  },
+  "login": {
+    "title": "Anmelden",
+    "subtitle": "Mit Admin-Benutzername und Passwort anmelden.",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "button": "Anmelden",
+    "signingIn": "Anmeldung…",
+    "error": "Anmeldung fehlgeschlagen."
+  },
+  "dashboard": {
+    "title": "Übersicht",
+    "overview": "Überblick",
+    "intro": "Schneller Überblick über Nutzer, Umsatz, Bestellungen und Inhalte.",
+    "totalUsers": "Nutzer gesamt",
+    "activeSubscribers": "Aktive Abonnenten",
+    "revenueStars": "Umsatz in Stars",
+    "ordersToday": "Bestellungen heute",
+    "ordersMonth": "Bestellungen diesen Monat",
+    "activePromoCodes": "Aktive Promo-Codes",
+    "activeBanners": "Aktive Banner",
+    "adminIds": "Admin-IDs",
+    "recentOrders": "Letzte Bestellungen",
+    "recentUsers": "Letzte Nutzer"
+  },
+  "users": {
+    "title": "Nutzer",
+    "addUser": "Nutzer hinzufügen",
+    "showDeleted": "Gelöschte anzeigen",
+    "searchPlaceholder": "Nach Telegram-ID, Nutzername, Vor- oder Nachname suchen",
+    "selectedUser": "Ausgewählter Nutzer",
+    "paymentHistory": "Zahlungsverlauf",
+    "promoUsage": "Promo-Nutzung",
+    "dangerZone": "Gefahrenbereich",
+    "deleteUser": "Nutzer löschen",
+    "restoreUser": "Wiederherstellen",
+    "permanentDelete": "Endgültig löschen",
+    "deleteConfirm": "Diesen Nutzer löschen? Er wird ausgeblendet, die Bestellhistorie bleibt erhalten. Wiederherstellung ist möglich.",
+    "restoreConfirm": "Diesen Nutzer wiederherstellen? Frühere Zugänge werden NICHT automatisch wiederhergestellt.",
+    "permanentConfirm": "Diesen Nutzer ENDGÜLTIG löschen? Das kann nicht rückgängig gemacht werden.",
+    "permanentPrompt": "Gib PERMANENTLY_DELETE ein, um zu bestätigen:",
+    "deletedOn": "Gelöscht am {date}",
+    "deletedTag": "Gelöscht",
+    "create": {
+      "title": "Nutzer hinzufügen",
+      "telegramId": "Telegram-ID",
+      "username": "Benutzername",
+      "usernameHint": "ohne @",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "language": "Sprache",
+      "category": "Kategorie",
+      "adminNote": "Admin-Notiz",
+      "grantAccess": "Sofort Zugang gewähren",
+      "byDays": "Nach Tagen",
+      "lifetime": "Lebenslang",
+      "accessDays": "Zugangstage",
+      "reason": "Grund"
+    }
+  },
+  "products": {
+    "title": "Produkte",
+    "new": "Neues Produkt",
+    "productName": "Produktname",
+    "description": "Beschreibung",
+    "badge": "Badge (optional)",
+    "badgeHint": "Kurzes Label wie 'Bestes Angebot' oder 'Beliebt'",
+    "price": "Preis (Telegram Stars)",
+    "oldPrice": "Alter Preis (für Rabatt)",
+    "oldPriceHint": "Leer lassen, wenn kein Rabatt. Wird in der App durchgestrichen gezeigt.",
+    "access": "Zugang",
+    "lifetime": "Lebenslanger Zugang",
+    "accessDays": "Zugangsdauer (Tage)",
+    "active": "Aktiv",
+    "deletePaidOrders": "Dieses Produkt hat bezahlte Bestellungen. Es wird deaktiviert statt gelöscht."
+  },
+  "promoCodes": {
+    "title": "Promo-Codes"
+  },
+  "orders": {
+    "title": "Bestellungen",
+    "filter": "Filtern"
+  },
+  "banners": {
+    "title": "Banner",
+    "new": "Neues Banner",
+    "content": "Inhalt",
+    "cta": "Call to action",
+    "display": "Anzeige",
+    "schedule": "Zeitplan",
+    "titleField": "Titel",
+    "subtitle": "Untertitel",
+    "image": "Bild",
+    "buttonText": "Button-Text",
+    "buttonLink": "Button-Link",
+    "whereToShow": "Wo anzeigen",
+    "showForLanguages": "Sprachen anzeigen",
+    "all": "Alle",
+    "active": "Aktiv",
+    "sortOrder": "Sortierung",
+    "showFrom": "Anzeigen ab",
+    "showUntil": "Anzeigen bis",
+    "placement": {
+      "HOME_TOP": "Startseite oben",
+      "HOME_MIDDLE": "Startseite Mitte",
+      "PRICING_TOP": "Preis-Seite oben",
+      "QUIZ_BOTTOM": "Quiz unten",
+      "LEARN_TOP": "Lernen oben"
+    }
+  },
+  "promotions": {
+    "title": "Aktionen"
+  },
+  "news": {
+    "title": "News",
+    "new": "Neuer Beitrag",
+    "headline": "Überschrift",
+    "shortSummary": "Kurzfassung",
+    "content": "Inhalt",
+    "coverImage": "Titelbild",
+    "language": "Sprache",
+    "published": "Veröffentlicht",
+    "draft": "Entwurf",
+    "publishedOnly": "Nur veröffentlichte Beiträge sind in der App sichtbar"
+  },
+  "preview": {
+    "title": "Live-Vorschau",
+    "phone": "Handy-Vorschau"
+  },
+  "upload": {
+    "drop": "Bild hier ablegen oder anklicken",
+    "remove": "Entfernen",
+    "uploading": "Wird hochgeladen…",
+    "unsupported": "Nicht unterstützter Dateityp. JPG, PNG, WebP oder GIF verwenden.",
+    "sizeHint": "Maximale Dateigröße: 5 MB"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "appearance": "Darstellung",
+    "account": "Konto",
+    "about": "Info"
+  },
+  "editor": {
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "heading2": "H2",
+    "heading3": "H3",
+    "bulletList": "Aufzählung",
+    "orderedList": "Nummeriert",
+    "link": "Link",
+    "insertImage": "Bild-URL"
+  }
+}

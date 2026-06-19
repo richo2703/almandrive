@@ -16,16 +16,16 @@ import { ProfilePage } from "./pages/ProfilePage";
 import {
   AdminLayout,
   AdminLoginPage,
-  AdminBannersPage,
-  AdminDashboardPage,
-  AdminNewsPage,
-  AdminOrdersPage,
-  AdminProductsPage,
-  AdminPromotionsPage,
-  AdminPromoCodesPage,
-  AdminSettingsPage,
-  AdminUsersPage,
-} from "./pages/AdminPages";
+  DashboardPage as AdminDashboardPage,
+  ProductsPage as AdminProductsPage,
+  PromoCodesPage as AdminPromoCodesPage,
+  UsersPage as AdminUsersPage,
+  OrdersPage as AdminOrdersPage,
+  BannersPage as AdminBannersPage,
+  PromotionsPage as AdminPromotionsPage,
+  NewsPage as AdminNewsPage,
+  SettingsPage as AdminSettingsPage,
+} from "./pages/admin";
 
 function TitleSync() {
   const location = useLocation();
