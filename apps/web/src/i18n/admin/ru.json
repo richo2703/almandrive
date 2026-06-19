@@ -31,7 +31,9 @@
     "theme": "Тема",
     "language": "Язык",
     "upload": "Загрузить",
-    "remove": "Удалить"
+    "remove": "Удалить",
+    "prev": "Назад",
+    "next": "Далее"
   },
   "theme": {
     "light": "Светлая",
@@ -84,6 +86,18 @@
     "permanentPrompt": "Введите PERMANENTLY_DELETE для подтверждения:",
     "deletedOn": "Удалён {date}",
     "deletedTag": "Удалён",
+    "empty": "Пользователи не найдены",
+    "registered": "Регистрация",
+    "admin": "Админ",
+    "block": "Заблокировать",
+    "unblock": "Разблокировать",
+    "accessHistory": "История доступа",
+    "pageSummary": "Страница {{page}} из {{totalPages}} · {{total}} пользователей",
+    "status": {
+      "active": "Активен",
+      "blocked": "Заблокирован",
+      "deleted": "Удалён"
+    },
     "create": {
       "title": "Добавить пользователя",
       "telegramId": "Telegram ID",

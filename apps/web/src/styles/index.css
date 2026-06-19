@@ -723,6 +723,144 @@ p { line-height: 1.55; color: var(--muted); }
   gap: 10px;
 }
 
+.admin-toolbar {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-user-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-user-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  background: var(--admin-bg-primary);
+  color: var(--admin-text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-user-card p,
+.admin-user-card small {
+  margin: 2px 0 0;
+  color: var(--admin-text-secondary);
+}
+
+.admin-avatar {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  font-weight: 800;
+}
+
+.admin-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-status.is-warning {
+  border-color: color-mix(in srgb, var(--admin-warning) 36%, var(--admin-border));
+  color: var(--admin-warning);
+}
+
+.admin-status.is-danger {
+  border-color: color-mix(in srgb, var(--admin-danger) 36%, var(--admin-border));
+  color: var(--admin-danger);
+}
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  color: var(--admin-text-secondary);
+}
+
+.admin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+  background: color-mix(in srgb, hsl(var(--foreground)) 22%, transparent);
+}
+
+.admin-panel {
+  width: min(100%, 440px);
+  height: 100%;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 20px;
+  border-left: 1px solid var(--admin-border);
+  background: var(--admin-bg-secondary);
+  color: var(--admin-text-primary);
+}
+
+.admin-panel--wide {
+  width: min(100%, 620px);
+}
+
+.admin-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-user-detail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-user-detail div,
+.admin-detail-section {
+  border: 1px solid var(--admin-border);
+  border-radius: 14px;
+  background: var(--admin-bg-primary);
+  padding: 12px;
+}
+
+.admin-user-detail span,
+.admin-detail-section p {
+  color: var(--admin-text-secondary);
+}
+
+.admin-user-detail strong {
+  display: block;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.admin-detail-section {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-detail-section h3,
+.admin-detail-section p {
+  margin: 0;
+}
+
 .admin-switch {
   min-height: 44px;
   display: flex;

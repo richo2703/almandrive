@@ -31,7 +31,9 @@
     "theme": "Design",
     "language": "Sprache",
     "upload": "Hochladen",
-    "remove": "Entfernen"
+    "remove": "Entfernen",
+    "prev": "Zurück",
+    "next": "Weiter"
   },
   "theme": {
     "light": "Hell",
@@ -84,6 +86,18 @@
     "permanentPrompt": "Gib PERMANENTLY_DELETE ein, um zu bestätigen:",
     "deletedOn": "Gelöscht am {date}",
     "deletedTag": "Gelöscht",
+    "empty": "Keine Nutzer gefunden",
+    "registered": "Registriert",
+    "admin": "Admin",
+    "block": "Sperren",
+    "unblock": "Entsperren",
+    "accessHistory": "Zugangsverlauf",
+    "pageSummary": "Seite {{page}} von {{totalPages}} · {{total}} Nutzer",
+    "status": {
+      "active": "Aktiv",
+      "blocked": "Gesperrt",
+      "deleted": "Gelöscht"
+    },
     "create": {
       "title": "Nutzer hinzufügen",
       "telegramId": "Telegram-ID",
