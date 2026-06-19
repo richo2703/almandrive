@@ -295,7 +295,9 @@
     "title": "Настройки",
     "appearance": "Внешний вид",
     "account": "Аккаунт",
-    "about": "О приложении"
+    "about": "О приложении",
+    "preferencesStored": "Тема и язык сохраняются локально.",
+    "version": "Версия {{version}}"
   },
   "editor": {
     "bold": "Жирный",

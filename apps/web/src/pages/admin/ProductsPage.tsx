@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { api, type Product, type ProductInput } from "../../lib/api";
+import { formatDuration } from "../../lib/format";
 import { useApp } from "../../context/AppContext";
 import { AdminButton } from "../../components/admin/Button";
 import { AdminCard } from "../../components/admin/Card";
@@ -26,7 +27,7 @@ const emptyProduct: ProductInput = {
 
 export function ProductsPage() {
   const { isAdmin } = useApp();
-  const { t } = useTranslation("translation");
+  const { t, i18n } = useTranslation("translation");
   const [items, setItems] = useState<Product[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<ProductInput>(emptyProduct);
@@ -169,7 +170,7 @@ export function ProductsPage() {
               </p>
               <p>{draft.description || t("products.description")}</p>
               <button type="button" className="admin-button admin-button--primary">
-                {draft.isLifetime ? `${t("products.lifetime")} · ${draft.priceStars} ⭐` : `${draft.accessDays ?? 1} days · ${draft.priceStars} ⭐`}
+                {`${formatDuration(draft.isLifetime ? null : draft.accessDays ?? 1, i18n.language)} · ${draft.priceStars} ⭐`}
               </button>
             </article>
           </div>

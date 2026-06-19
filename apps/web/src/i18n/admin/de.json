@@ -295,7 +295,9 @@
     "title": "Einstellungen",
     "appearance": "Darstellung",
     "account": "Konto",
-    "about": "Info"
+    "about": "Info",
+    "preferencesStored": "Design- und Spracheinstellungen werden lokal gespeichert.",
+    "version": "Version {{version}}"
   },
   "editor": {
     "bold": "Fett",

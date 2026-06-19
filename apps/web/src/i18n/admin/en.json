@@ -295,7 +295,9 @@
     "title": "Settings",
     "appearance": "Appearance",
     "account": "Account",
-    "about": "About"
+    "about": "About",
+    "preferencesStored": "Theme and language preferences are stored locally.",
+    "version": "Version {{version}}"
   },
   "editor": {
     "bold": "Bold",

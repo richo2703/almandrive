@@ -7,7 +7,7 @@ export function Topbar({ query, onChange }: { query: string; onChange(value: str
     <div className="admin-topbar">
       <label className="admin-search">
         <Search size={16} />
-        <input value={query} onChange={(event) => onChange(event.target.value)} placeholder={t("layout.searchPlaceholder")} />
+        <input className="admin-input" value={query} onChange={(event) => onChange(event.target.value)} placeholder={t("layout.searchPlaceholder")} />
       </label>
     </div>
   );

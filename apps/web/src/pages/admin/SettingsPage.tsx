@@ -5,6 +5,7 @@ import { api } from "../../lib/api";
 import { AdminCard } from "../../components/admin/Card";
 import { ThemeToggle, useAdminTheme } from "../../components/admin/ThemeToggle";
 import { LanguageSwitcher } from "../../components/admin/LanguageSwitcher";
+import pkg from "../../../package.json";
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation("translation");
@@ -17,7 +18,7 @@ export function SettingsPage() {
 
   return (
     <div className="admin-stack">
-      <AdminCard title={t("settings.appearance")} subtitle="Theme and language preferences are stored locally.">
+      <AdminCard title={t("settings.appearance")} subtitle={t("settings.preferencesStored")}>
         <div className="admin-stack">
           <ThemeToggle theme={theme} onChange={setTheme} />
           <LanguageSwitcher />
@@ -28,7 +29,7 @@ export function SettingsPage() {
         <p className="admin-muted">{settings ? settings.adminTelegramIds.join(", ") : t("common.loading")}</p>
       </AdminCard>
       <AdminCard title={t("settings.about")}>
-        <p className="admin-muted">Version 0.1.0</p>
+        <p className="admin-muted">{t("settings.version", { version: pkg.version })}</p>
       </AdminCard>
     </div>
   );

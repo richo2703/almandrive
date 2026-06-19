@@ -10,6 +10,7 @@ import { DateTimePicker } from "../../components/admin/DateTimePicker";
 import { Input } from "../../components/admin/Input";
 import { Select } from "../../components/admin/Select";
 import { api, type PaymentOrder } from "../../lib/api";
+import { formatDuration } from "../../lib/format";
 import { useApp } from "../../context/AppContext";
 
 const emptyFilters = {
@@ -24,7 +25,7 @@ const emptyFilters = {
 
 export function OrdersPage() {
   const { isAdmin } = useApp();
-  const { t } = useTranslation("translation");
+  const { t, i18n } = useTranslation("translation");
   const [orders, setOrders] = useState<PaymentOrder[]>([]);
   const [filters, setFilters] = useState(emptyFilters);
   const [applied, setApplied] = useState(emptyFilters);
@@ -137,7 +138,7 @@ export function OrdersPage() {
             <div>
               <span className={`admin-status ${orderStatusClass(order.status)}`}>{t(`orders.statuses.${displayStatus(order.status)}`)}</span>
               <h3><Star size={16} />{order.amountStarsFinal} {t("orders.stars")}</h3>
-              <p>{order.product?.title ?? t("orders.product")} · {order.product?.isLifetime ? t("products.lifetime") : `${order.product?.accessDays ?? 0} ${t("orders.days")}`}</p>
+              <p>{order.product?.title ?? t("orders.product")} · {formatDuration(order.product?.isLifetime ? null : order.product?.accessDays ?? 0, i18n.language)}</p>
             </div>
             <div>
               <Link className="admin-link" to={`/admin/users?q=${encodeURIComponent(order.user?.telegramId ?? order.userId)}`}>{displayUser(order)}</Link>

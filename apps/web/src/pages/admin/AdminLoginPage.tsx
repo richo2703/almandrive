@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { api, ApiError } from "../../lib/api";
 import { useAdminTheme } from "../../components/admin/ThemeToggle";
+import { Input } from "../../components/admin/Input";
+import { AdminButton } from "../../components/admin/Button";
 
 export function AdminLoginPage() {
   const navigate = useNavigate();
@@ -38,22 +40,16 @@ export function AdminLoginPage() {
         <p className="admin-eyebrow">Admin</p>
         <h1>{t("login.title")}</h1>
         <p>{t("login.subtitle")}</p>
-        <label className="admin-field">
-          <span>{t("login.username")}</span>
-          <input value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" />
-        </label>
-        <label className="admin-field">
-          <span>{t("login.password")}</span>
-          <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" />
-        </label>
+        <Input label={t("login.username")} value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" />
+        <Input label={t("login.password")} value={password} onChange={(event) => setPassword(event.target.value)} type="password" autoComplete="current-password" />
         {error ? <div className="admin-alert admin-alert--danger">{error}</div> : null}
         <div className="admin-actions">
-          <button className="admin-button admin-button--primary" type="submit" disabled={loading}>
+          <AdminButton variant="primary" type="submit" disabled={loading}>
             {loading ? t("login.signingIn") : t("login.button")}
-          </button>
-          <button className="admin-button admin-button--secondary" type="button" onClick={() => navigate("/")}>
+          </AdminButton>
+          <AdminButton variant="secondary" type="button" onClick={() => navigate("/")}>
             {t("common.cancel")}
-          </button>
+          </AdminButton>
         </div>
       </form>
     </div>
