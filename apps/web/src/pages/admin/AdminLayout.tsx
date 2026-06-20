@@ -33,7 +33,9 @@ export function AdminLayout() {
       <section className="admin-main">
         <Topbar query={query} onChange={setQuery} />
         <main className="admin-main__content">
-          <Outlet />
+          <div className="admin-content-shell">
+            <Outlet />
+          </div>
         </main>
       </section>
     </div>
