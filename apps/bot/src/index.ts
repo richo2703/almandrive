@@ -22,9 +22,19 @@ if (!env.TELEGRAM_BOT_TOKEN) {
   const bot = new Bot(env.TELEGRAM_BOT_TOKEN);
 
   bot.command("start", async (ctx) => {
-    const keyboard = new InlineKeyboard().webApp("Open Alman Drive", env.WEB_APP_URL);
+    const keyboard = new InlineKeyboard().webApp("🚗 Open Alman Drive", env.WEB_APP_URL);
     await ctx.reply(
-      "Learn German driving theory with original practice questions. Question content is currently available in English.",
+      [
+        "🚗 Alman Drive",
+        "",
+        "🇺🇿 Germaniyada haydovchilik nazariy imtihoniga tayyorlaning. Testlar, mavzular va progress — Telegram ichida.",
+        "",
+        "🇷🇺 Готовьтесь к теоретическому экзамену на водительские права в Германии. Тесты, темы и прогресс — прямо в Telegram.",
+        "",
+        "🇩🇪 Bereiten Sie sich auf die theoretische Führerscheinprüfung in Deutschland vor. Tests, Themen und Fortschritt — direkt in Telegram.",
+        "",
+        "🇬🇧 Prepare for the German driving theory exam. Tests, topics and progress — directly in Telegram.",
+      ].join("\n"),
       { reply_markup: keyboard },
     );
   });
